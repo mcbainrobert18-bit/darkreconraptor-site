@@ -22,12 +22,20 @@ A      @      185.199.109.153     3600
 A      @      185.199.110.153     3600
 A      @      185.199.111.153     3600
 
-STEP 4 — GitHub repo settings (one-time)
------------------------------------------
-https://github.com/mcbainrobert18-bit/darkreconraptor-site/settings/pages
-  Source: Deploy from branch -> main -> / (root)
+STEP 4 — GitHub Pages settings (one-time, ~2 min)
+--------------------------------------------------
+Open: https://github.com/mcbainrobert18-bit/darkreconraptor-site/settings/pages
+
+  Build and deployment:
+    Source: Deploy from a branch
+    Branch: main
+    Folder: / (root)
+
   Custom domain: www.darkreconraptor.com
-  Enforce HTTPS: ON (after DNS propagates, ~10-60 min)
+    (CNAME file is already in the repo)
+
+  After DNS propagates (~10-60 min):
+    Enforce HTTPS: ON
 
 STEP 5 — VERIFY
 ---------------
