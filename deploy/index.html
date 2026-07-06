@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deploy — Njalla DNS Setup</title>
+  <style>
+    body{font-family:system-ui,sans-serif;background:#050508;color:#c8c8e8;max-width:720px;margin:2rem auto;padding:0 1rem;line-height:1.7}
+    h1{color:#7b2fff;font-size:1.5rem}
+    code,pre{background:#0d0d1a;padding:2px 6px;border-radius:4px;font-size:0.9rem}
+    pre{padding:1rem;overflow-x:auto}
+    table{width:100%;border-collapse:collapse;margin:1rem 0}
+    th,td{border:1px solid #1a1a3a;padding:8px;text-align:left}
+    th{background:#1a1a3a;color:#00f0ff}
+    a{color:#00f0ff}
+    .warn{background:rgba(255,45,120,0.1);border-left:3px solid #ff2d78;padding:1rem;margin:1rem 0}
+  </style>
+</head>
+<body>
+  <p><a href="/">← Home</a></p>
+  <h1>Njalla DNS → VPS Deploy</h1>
+
+  <div class="warn">
+    <strong>Action required:</strong> <code>www.darkreconraptor.com</code> currently CNAMEs to NinjaTech.
+    Delete that record in Njalla and add an A record to your VPS IP.
+  </div>
+
+  <h2>1. Njalla A records</h2>
+  <table>
+    <tr><th>Type</th><th>Host</th><th>Value</th></tr>
+    <tr><td>A</td><td>@</td><td>YOUR_SERVER_IP</td></tr>
+    <tr><td>A</td><td>www</td><td>YOUR_SERVER_IP</td></tr>
+    <tr><td>A</td><td>hud</td><td>YOUR_SERVER_IP</td></tr>
+    <tr><td>A</td><td>beast</td><td>YOUR_SERVER_IP</td></tr>
+    <tr><td>A</td><td>operator</td><td>YOUR_SERVER_IP</td></tr>
+  </table>
+
+  <h2>2. One-click deploy (Windows)</h2>
+  <pre>cd C:\Users\xxdae\darkreconraptor_site\deploy
+.\GO-LIVE.ps1 -ServerIp "YOUR_SERVER_IP"</pre>
+  <p>Or double-click <code>LINK-DOMAIN.bat</code> in the site folder.</p>
+
+  <h2>3. Nginx + SSL (VPS)</h2>
+  <pre>sudo cp /var/www/darkreconraptor/deploy/nginx.conf /etc/nginx/sites-available/darkreconraptor
+sudo ln -sf /etc/nginx/sites-available/darkreconraptor /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d darkreconraptor.com -d www.darkreconraptor.com \
+  -d hud.darkreconraptor.com -d beast.darkreconraptor.com -d operator.darkreconraptor.com</pre>
+
+  <h2>4. GPU cloud (Vast.ai)</h2>
+  <p>Spin up Signal World + Ollama on a cheap GPU instance (~$0.20/hr). Destroy when done.</p>
+  <p><a href="/deploy/VAST_AI_SETUP.md">VAST_AI_SETUP.md</a></p>
+  <p>Full Njalla guide: <a href="/deploy/NJALLA_DNS_SETUP.md">NJALLA_DNS_SETUP.md</a></p>
+</body>
+</html>

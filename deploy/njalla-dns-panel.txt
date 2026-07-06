@@ -1,0 +1,35 @@
+NJALLA DNS PANEL — darkreconraptor.com
+========================================
+Login: https://njal.la/signin/
+Go to: Domains → darkreconraptor.com → DNS
+
+STEP 1 — DELETE THESE (they point to NinjaTech / CloudFront)
+------------------------------------------------------------
+Delete ANY record where:
+  - www → CNAME → sites.super.myninja.ai  (or any myninja.ai host)
+  - @   → A     → 3.173.161.x  (AWS CloudFront — old setup)
+  - Any other third-party CNAME you did not create
+
+STEP 2 — ADD THESE (replace YOUR_SERVER_IP with your VPS IPv4)
+--------------------------------------------------------------
+Type   Host        Value              TTL
+A      @           YOUR_SERVER_IP     3600
+A      www         YOUR_SERVER_IP     3600
+A      hud         YOUR_SERVER_IP     3600
+A      beast       YOUR_SERVER_IP     3600
+A      operator    YOUR_SERVER_IP     3600
+
+STEP 3 — VERIFY (PowerShell on your PC)
+---------------------------------------
+nslookup darkreconraptor.com
+nslookup www.darkreconraptor.com
+
+Both must return YOUR_SERVER_IP (not 3.173.161.x or 99.84.160.x).
+
+STEP 4 — DEPLOY FROM WINDOWS
+----------------------------
+cd C:\Users\xxdae\darkreconraptor_site\deploy
+.\GO-LIVE.ps1 -ServerIp "YOUR_SERVER_IP"
+
+Njalla VPS: https://njal.la/servers/  (15 EUR/mo — same dashboard as domain)
+Cheaper alt: RackNerd ~$23/year, Hetzner ~$4/mo — same A records, any provider.

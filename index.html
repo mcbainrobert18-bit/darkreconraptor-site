@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DarkReconRaptor — XxDark187xX Command Center</title>
+  <meta name="description" content="DarkReconRaptor Lab Edition, Master Guide, Signal HUD, and authorized security research tools by XxDark187xX.">
+  <meta property="og:title" content="DarkReconRaptor — XxDark187xX Command Center">
+  <meta property="og:description" content="Lab Edition, Master Guide, Signal HUD, BEAST dashboard. Authorized security research.">
+  <meta property="og:url" content="https://www.darkreconraptor.com/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://www.darkreconraptor.com/">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050508;
+      --card: #0d0d1a;
+      --border: #1a1a3a;
+      --accent: #7b2fff;
+      --cyan: #00f0ff;
+      --green: #00ff88;
+      --text: #c8c8e8;
+      --dim: #888aaa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    header {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 2.5rem;
+      background: linear-gradient(180deg, rgba(123,47,255,0.08) 0%, transparent 100%);
+    }
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.6rem, 5vw, 2.6rem);
+      letter-spacing: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--cyan), #ff2d78);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tagline { color: var(--dim); letter-spacing: 2px; margin-top: 0.5rem; font-size: 0.95rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card.featured { border-color: var(--green); grid-column: 1 / -1; }
+    .card h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      color: var(--cyan);
+      letter-spacing: 1.5px;
+      margin-bottom: 0.75rem;
+    }
+    .card p { color: var(--text); flex: 1; margin-bottom: 1rem; }
+    .btn {
+      display: inline-block;
+      padding: 0.65rem 1.25rem;
+      background: linear-gradient(135deg, var(--accent), #5a1fcc);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-align: center;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn.green { background: linear-gradient(135deg, var(--green), #00cc6a); color: #000; }
+    .btn.outline {
+      background: transparent;
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+    }
+    .links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--dim);
+      font-size: 0.85rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>⚡ DARKRECONRAPTOR ⚡</h1>
+      <p class="tagline">OWNERSHIP · CODE ARCHIVE · MONEY · FIRMWARE · VR/AR · SCALE</p>
+      <p class="tagline" style="margin-top:0.25rem">XxDark187xX — www.darkreconraptor.com</p>
+    </header>
+
+    <div class="grid">
+      <article class="card featured">
+        <span class="badge">FLAGSHIP</span>
+        <h2>LAB EDITION — GET THE BUNDLE</h2>
+        <p>DarkReconRaptor Lab Edition 2026: AI pentest prompts, offline voice lab, Docker homelab, bug bounty tracker, and hardware lab primers. Instant digital download.</p>
+        <div class="links">
+          <a class="btn green" href="https://shadowmancer444.gumroad.com/l/darkreconraptor-lab-edition">Buy Lab Edition — $97</a>
+          <a class="btn outline" href="/shop/">View All Products</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>MASTER GUIDE</h2>
+        <p>Full ownership playbook: save your code, get a VPS, own your domain, stack income streams, Flipper/NetHunter, VR/AR HUD, and the 30-day sprint.</p>
+        <a class="btn" href="/guide/">Open Master Guide</a>
+      </article>
+
+      <article class="card">
+        <h2>RECON RAPTOR LAB</h2>
+        <p>Authorized security research platform — dashboard, signal overlay, scope templates. Educational lab edition only.</p>
+        <a class="btn" href="/lab/">Explore Lab</a>
+      </article>
+
+      <article class="card">
+        <h2>SIGNAL HUD</h2>
+        <p>Signal Overlay Control Center — RF viz, grind vs gaming mode, Quest-ready HUD. Operator subdomain.</p>
+        <a class="btn outline" href="/hud/">Launch HUD</a>
+      </article>
+
+      <article class="card">
+        <h2>BEAST DASHBOARD</h2>
+        <p>ReconRaptor BEAST — full framework guide, 261-tool command center for authorized assessments.</p>
+        <a class="btn outline" href="/beast/">Open Beast</a>
+      </article>
+
+      <article class="card">
+        <h2>OPERATOR CONSOLE</h2>
+        <p>Private operator control center. Restrict access via nginx IP allowlist on your VPS.</p>
+        <a class="btn outline" href="/hud/">Operator (preview)</a>
+      </article>
+
+      <article class="card">
+        <h2>DARK FLIPOUT</h2>
+        <p>Flipper Zero operator bundle — firmware, STL prints, sale edition assets.</p>
+        <div class="links">
+          <a class="btn outline" href="/flipout/">Flipout Landing</a>
+          <a class="btn outline" href="https://shadowmancer444.gumroad.com/">Gumroad</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>DEPLOY YOUR OWN</h2>
+        <p>Domain on Njalla → point A records to your VPS → nginx + systemd = 24/7 forever. No NinjaTech dependency.</p>
+        <a class="btn" href="/deploy/">Njalla DNS Setup</a>
+      </article>
+    </div>
+
+    <footer>
+      <p>&copy; 2026 XxDark187xX / DarkReconRaptor. Authorized security research &amp; education only.</p>
+      <p style="margin-top:0.5rem">Domain: <strong>darkreconraptor.com</strong> · Registrar: Njalla</p>
+    </footer>
+  </div>
+</body>
+</html>

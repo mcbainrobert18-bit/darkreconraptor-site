@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReconRaptor LAB v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--panel:#111118;--accent:#00ff88;--warn:#ff0033;--text:#e0e0e0;--muted:#666680}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Rajdhani,sans-serif;background:var(--bg);color:var(--text);padding:2rem}
+h1{font-family:Orbitron,sans-serif;color:var(--accent);letter-spacing:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-top:1.5rem}
+.card{background:var(--panel);border:1px solid #1e1e2e;border-radius:12px;padding:1.25rem}
+.card h3{font-family:Orbitron;font-size:.75rem;color:var(--accent);margin-bottom:.5rem}
+.btn{display:inline-block;margin-top:.75rem;padding:.5rem 1rem;background:var(--warn);color:#fff;text-decoration:none;font-family:Orbitron;font-size:.6rem;border-radius:6px}
+.warn{color:#ffaa00;font-size:.85rem;margin:1rem 0;padding:.75rem;border-left:3px solid #ffaa00}
+</style>
+</head>
+<body>
+<h1>RECONRAPTOR LAB v2</h1>
+<p style="color:var(--muted)">Authorized lab launcher — Kali · Parrot · Android · WSL</p>
+<div class="warn">Set LAB_AUTHORIZED=1 before any script. Owned targets only.</div>
+<div class="grid">
+  <div class="card"><h3>LAB LAUNCHER</h3><p>Bash cross-platform recon launcher from vault.</p><a class="btn" href="../scripts/rr_lab_launcher.sh">rr_lab_launcher.sh</a></div>
+  <div class="card"><h3>SIGNAL WORLD</h3><p>RF spectrum overlay — grind mode for creators.</p><a class="btn" href="signal_overlay.html">Open Overlay</a></div>
+  <div class="card"><h3>SCOPE DOC</h3><p>Sign before every assessment.</p><a class="btn" href="../docs/scope_template.md">Scope Template</a></div>
+  <div class="card"><h3>VAULT</h3><p>526+ pulled scripts from USB + harvest.</p><a class="btn" href="../vault">Open Vault</a></div>
+  <div class="card"><h3>FLIPOUT CROSS-SELL</h3><p>Hardware lab pairs with Dark Flipout.</p><a class="btn" href="file:///C:/Users/xxdae/EMPIRE_LAUNCHPAD/index.html">Empire Launchpad</a></div>
+</div>
+<footer style="margin-top:2rem;color:var(--muted);font-size:.75rem">Educational / authorized testing only · Not affiliated with offensive live-target tooling</footer>
+</body>
+</html>

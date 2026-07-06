@@ -1,0 +1,43 @@
+NJALLA DNS — GitHub Pages (interim www host)
+=============================================
+Login: https://njal.la/signin/
+Go to: Domains -> darkreconraptor.com -> DNS
+
+STEP 1 — DELETE (breaks NinjaTech / old CloudFront)
+----------------------------------------------------
+  www  CNAME  sites.super.myninja.ai   (or any myninja.ai host)
+
+STEP 2 — ADD for www (GitHub Pages)
+------------------------------------
+Type    Host   Value                           TTL
+CNAME   www    mcbainrobert18-bit.github.io    3600
+
+STEP 3 — OPTIONAL apex (darkreconraptor.com without www)
+---------------------------------------------------------
+Delete @ A records pointing to 3.173.161.x (CloudFront), then add:
+
+Type   Host   Value               TTL
+A      @      185.199.108.153     3600
+A      @      185.199.109.153     3600
+A      @      185.199.110.153     3600
+A      @      185.199.111.153     3600
+
+STEP 4 — GitHub repo settings (one-time)
+-----------------------------------------
+https://github.com/mcbainrobert18-bit/darkreconraptor-site/settings/pages
+  Source: Deploy from branch -> main -> / (root)
+  Custom domain: www.darkreconraptor.com
+  Enforce HTTPS: ON (after DNS propagates, ~10-60 min)
+
+STEP 5 — VERIFY
+---------------
+nslookup www.darkreconraptor.com
+  -> should show mcbainrobert18-bit.github.io aliases
+
+Open: https://www.darkreconraptor.com/
+
+WHEN VPS IS READY
+-----------------
+Switch www back to A record -> YOUR_VPS_IP
+Run: .\GO-LIVE.ps1 -ServerIp "YOUR_VPS_IP"
+See: njalla-dns-panel.txt

