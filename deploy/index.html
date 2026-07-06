@@ -21,8 +21,11 @@
   <h1>Njalla DNS → VPS Deploy</h1>
 
   <div class="warn">
-    <strong>Action required:</strong> <code>www.darkreconraptor.com</code> currently CNAMEs to NinjaTech.
-    Delete that record in Njalla and add an A record to your VPS IP.
+    <strong>Interim (now):</strong> GitHub Pages hosts <code>www</code> — Njalla CNAME <code>www</code> → <code>mcbainrobert18-bit.github.io</code>.
+    See <a href="/deploy/njalla-dns-github.txt">njalla-dns-github.txt</a>.
+  </div>
+  <div class="warn" style="border-color:#7b2fff;background:rgba(123,47,255,0.08)">
+    <strong>Later (VPS):</strong> Replace <code>www</code> CNAME with A record to your VPS IP. Run <code>GO-LIVE.ps1</code>.
   </div>
 
   <h2>1. Njalla A records</h2>
