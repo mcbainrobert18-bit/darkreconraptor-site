@@ -1,0 +1,51 @@
+DARKRECONRAPTOR — LINK BOTH PATHS + KILL NINJATECH (5 min)
+============================================================
+Status right now:
+  - NinjaTech CNAME is GONE (good)
+  - www has NO record yet (site offline until you add one below)
+  - Site code pushed to GitHub — no Ninja scripts in HTML
+
+PATH A — FREE NOW (GitHub Pages) — do this first
+-------------------------------------------------
+1. Njalla: https://njal.la/signin/ → Domains → darkreconraptor.com → DNS
+
+   ADD:
+     Type: CNAME   Host: www   Value: mcbainrobert18-bit.github.io   TTL: 3600
+
+   OPTIONAL (apex without www):
+     Type: A   Host: @   Value: 185.199.108.153   TTL: 3600
+     Type: A   Host: @   Value: 185.199.109.153   TTL: 3600
+     Type: A   Host: @   Value: 185.199.110.153   TTL: 3600
+     Type: A   Host: @   Value: 185.199.111.153   TTL: 3600
+
+2. GitHub Pages (one-time):
+   https://github.com/mcbainrobert18-bit/darkreconraptor-site/settings/pages
+   - Source: Deploy from branch → main → / (root)
+   - Custom domain: www.darkreconraptor.com
+   - After DNS check: Enforce HTTPS ON
+
+3. Wait 10-60 min, then open: https://www.darkreconraptor.com/
+
+PATH B — LATER (VPS full stack)
+-------------------------------
+After you buy a VPS (RackNerd ~$23/yr):
+
+1. Njalla DNS — REPLACE www CNAME with A records (all → YOUR_VPS_IP):
+     @  www  hud  beast  operator
+
+2. Windows deploy:
+     cd C:\Users\xxdae\darkreconraptor_site\deploy
+     .\GO-LIVE.ps1 -ServerIp "YOUR_VPS_IP"
+
+AUTO (if you have Njalla API token):
+  $env:NJALLA_TOKEN = "paste-from-njal.la-settings"
+  .\Set-Njalla-GithubPages.ps1
+
+VERIFY (PowerShell):
+  nslookup www.darkreconraptor.com 8.8.8.8
+  ipconfig /flushdns
+
+TEST LOCAL (right now, no DNS needed):
+  Double-click OPEN_LOCAL.bat
+  Or: cd C:\Users\xxdae\darkreconraptor_site && python -m http.server 8080
+  Open: http://localhost:8080/
